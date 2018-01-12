@@ -35,15 +35,15 @@ namespace SrmHeavyQCTests
 
         private void ProcessTest(string rawPath, string resultPath)
         {
-            var sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
             using (var reader = new XCalDataReader(rawPath))
             {
-                sw.Stop();
-                System.Console.WriteLine($"XCalDataReaderInitTime: {sw.Elapsed}");
                 var results = reader.ReadRawData();
+                if (results == null)
+                {
+                    return;
+                }
                 //reader.OutputResultsToConsole(results);
-                var comb = reader.AggregateResults(results);
+                var comb = reader.AggregateResults(results, 20);
                 //reader.OutputResultsToConsole(comb);
 
                 SrmCombinedResult.WriteCombinedResultsToFile(resultPath, comb);

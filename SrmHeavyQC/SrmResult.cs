@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace SrmHeavyQC
+﻿namespace SrmHeavyQC
 {
     public class SrmResult
     {
-        public const double TolerancePPM = 20;
+        public double TolerancePPM { get; }
 
         public SrmTableData Transition { get; }
-
-        [Obsolete()]
-        public List<SpectrumSection> SpectraResults { get; } = new List<SpectrumSection>();
 
         public double TargetMz { get; }
         public double MinMz { get; }
@@ -19,9 +12,10 @@ namespace SrmHeavyQC
 
         public double Area { get; set; }
 
-        public SrmResult(SrmTableData transition)
+        public SrmResult(SrmTableData transition, double tolerancePpm = 20)
         {
             Transition = transition;
+            TolerancePPM = tolerancePpm;
 
             //TargetMz = Transition.PrecursorMz; // No results
             TargetMz = Transition.ProductMz;
@@ -40,12 +34,6 @@ namespace SrmHeavyQC
             MinMz = 0;
             MaxMz = 0;
             Transition = new SrmTableData();
-        }
-
-        [Obsolete()]
-        public double GetSummedArea()
-        {
-            return SpectraResults.Sum(x => x.GetPeakArea());
         }
     }
 }

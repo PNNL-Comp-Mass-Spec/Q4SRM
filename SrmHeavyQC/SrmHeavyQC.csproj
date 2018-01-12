@@ -43,6 +43,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CompoundThresholdData.cs" />
     <Compile Include="Peak.cs" />
     <Compile Include="SpectrumSection.cs" />
     <Compile Include="SrmCombinedResult.cs" />

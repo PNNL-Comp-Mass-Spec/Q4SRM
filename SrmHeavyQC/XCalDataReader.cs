@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThermoRawFileReader;
 
 namespace SrmHeavyQC
@@ -22,15 +20,15 @@ namespace SrmHeavyQC
             rawReader.OpenRawFile(RawFilePath);
         }
 
-        public List<SrmResult> ReadRawData()
+        public List<SrmResult> ReadRawData(double tolerancePpm = 20)
         {
-            Console.WriteLine("Reading data from file...");
-            var sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-            var srmTransitions = GetHeavyTransitions().Select(x => new SrmResult(x)).ToList();
-            var elapsed = sw.Elapsed;
-            Console.WriteLine($"ReadTransitions: {elapsed}");
-            sw.Restart();
+            var srmTransitions = GetHeavyTransitions().Select(x => new SrmResult(x, tolerancePpm)).ToList();
+            //Console.WriteLine($"File \"{RawFilePath}\": {srmTransitions.Count} heavy transitions in instrument method.");
+            if (srmTransitions.Count == 0)
+            {
+                Console.WriteLine($"ERROR: Could not read instrument methods or find heavy transitions for file \"{RawFilePath}\"");
+                return null;
+            }
             //var temp = new List<SrmResult>();
             //temp.Add(srmTransitions[0]);
             //srmTransitions = temp;
@@ -42,9 +40,6 @@ namespace SrmHeavyQC
                 rawReader.GetRetentionTime(i, out var time);
                 scanTimes.Add(i, time);
             }
-            elapsed = sw.Elapsed;
-            Console.WriteLine($"ReadRetentionTimes: {elapsed}");
-            sw.Restart();
 
             // Map transition start/stop times to scans
             var scansAndTargets = new Dictionary<int, List<SrmResult>>();
@@ -56,9 +51,6 @@ namespace SrmHeavyQC
                     scansAndTargets.Add(scan.Key, matches);
                 }
             }
-            elapsed = sw.Elapsed;
-            Console.WriteLine($"MapTransitionsToScans: {elapsed}");
-            sw.Restart();
 
             // read spectra data for each transition from the file, in an optimized fashion
             foreach (var scan in scansAndTargets)
@@ -91,15 +83,16 @@ namespace SrmHeavyQC
                     }
                 }
             }
-            elapsed = sw.Elapsed;
-            Console.WriteLine($"ReadData: {elapsed}");
-            sw.Stop();
 
             return srmTransitions;
         }
 
-        public List<SrmCombinedResult> AggregateResults(IEnumerable<SrmResult> results, double threshold)
+        public List<SrmCombinedResult> AggregateResults(IEnumerable<SrmResult> results, double threshold, Dictionary<string, CompoundThresholdData> compoundThresholds = null)
         {
+            if (compoundThresholds == null)
+            {
+                compoundThresholds = new Dictionary<string, CompoundThresholdData>();
+            }
             var combinedMap = new Dictionary<string, SrmCombinedResult>();
             foreach (var result in results)
             {
@@ -107,6 +100,11 @@ namespace SrmHeavyQC
                 if (!combinedMap.TryGetValue(result.Transition.CompoundName, out group))
                 {
                     group = new SrmCombinedResult(result.Transition) {Threshold = threshold};
+                    // Look for and handle custom thresholds
+                    if (compoundThresholds.TryGetValue(result.Transition.CompoundName, out var cThreshold))
+                    {
+                        group.Threshold = cThreshold.Threshold;
+                    }
                     combinedMap.Add(result.Transition.CompoundName, group);
                 }
 
@@ -133,12 +131,15 @@ namespace SrmHeavyQC
         public List<SrmTableData> GetAllTransitions()
         {
             var srmTransitions = new List<SrmTableData>();
+            //Console.WriteLine($"File \"{RawFilePath}\": {rawReader.FileInfo.InstMethods.Count} instrument methods");
             foreach (var method in rawReader.FileInfo.InstMethods)
             {
+                //Console.WriteLine($"File \"{RawFilePath}\": InstMethod string length: {method.Length}");
                 var parsed = new XCalInstMethod(method);
                 srmTransitions.AddRange(parsed.ParseSrmTable());
             }
 
+            //Console.WriteLine($"File \"{RawFilePath}\": {srmTransitions.Count} transitions in intrument method");
             return srmTransitions;
         }
 

@@ -52,7 +52,7 @@ namespace SrmHeavyQC
             {
                 csv.Configuration.RegisterClassMap(new SrmTableDataMap());
                 csv.Configuration.Delimiter = "\t";
-                csv.Configuration.PrepareHeaderForMatch = header => header?.Trim();
+                csv.Configuration.PrepareHeaderForMatch = header => header?.ToLower().Trim();
                 csv.Configuration.MissingFieldFound = null; // Allow missing fields
                 csv.Configuration.HeaderValidated = null; // Allow missing header items
                 csv.Configuration.Comment = '#';
