@@ -54,7 +54,7 @@ namespace SrmHeavyQC
             public CompoundThresholdDataMap()
             {
                 Map(x => x.PrecursorMz).Name("Precursor (m/z)", "Precursor", "Parent").TypeConverterOption.NumberStyles(NumberStyles.Float | NumberStyles.AllowThousands);
-                Map(x => x.Threshold).Name("Threshold", "Product").TypeConverterOption.NumberStyles(NumberStyles.Float | NumberStyles.AllowThousands);
+                Map(x => x.Threshold).Name("Threshold").TypeConverterOption.NumberStyles(NumberStyles.Float | NumberStyles.AllowThousands);
                 Map(x => x.CompoundName).Name("Compound Name", "Name");
             }
         }

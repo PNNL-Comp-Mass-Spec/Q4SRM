@@ -6,7 +6,7 @@ using SrmHeavyQC;
 
 namespace SrmHeavyChecker
 {
-    public class Options
+    public class CmdLineOptions : IOptions
     {
         [Option("raw", Required = true, HelpShowsDefault = false, HelpText = "Path to .raw file, or directory containing .raw files")]
         public string RawFilePath { get; set; }
@@ -32,19 +32,16 @@ namespace SrmHeavyChecker
         [Option("threads", Required = false, HelpText = "Maximum number of threads to use (files processed simultaneously), '0' for automatic", Min = 0)]
         public int MaxThreads { get; set; }
 
-        public List<string> FilesToProcess { get; }
+        public List<string> FilesToProcessList { get; }
+        public IList<string> FilesToProcess => FilesToProcessList;
 
-        public List<CompoundThresholdData> CompoundThresholds { get; }
-        public Dictionary<string, CompoundThresholdData> CompoundThresholdsLookup { get; private set; }
-
-        public Options()
+        public CmdLineOptions()
         {
             RawFilePath = "";
             CompoundThresholdFilePath = "";
             DefaultThreshold = 20;
             PpmTolerance = 20;
-            FilesToProcess = new List<string>();
-            CompoundThresholds = new List<CompoundThresholdData>();
+            FilesToProcessList = new List<string>();
             Recurse = false;
             FileFilter = "*.raw";
             MaxThreads = 0;
@@ -60,7 +57,7 @@ namespace SrmHeavyChecker
                     return false;
                 }
 
-                FilesToProcess.Add(RawFilePath);
+                FilesToProcessList.Add(RawFilePath);
             }
             else if (!Directory.Exists(RawFilePath))
             {
@@ -71,7 +68,7 @@ namespace SrmHeavyChecker
             {
                 var searchOption = Recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
                 var toProcess = Directory.EnumerateFiles(RawFilePath, FileFilter, searchOption);
-                FilesToProcess.AddRange(toProcess);
+                FilesToProcessList.AddRange(toProcess);
             }
             else
             {
@@ -79,17 +76,10 @@ namespace SrmHeavyChecker
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(CompoundThresholdFilePath))
+            if (!string.IsNullOrWhiteSpace(CompoundThresholdFilePath) && !File.Exists(CompoundThresholdFilePath))
             {
-                if (!File.Exists(CompoundThresholdFilePath))
-                {
-                    Console.WriteLine("ERROR: Custom compound threshold file \"{0}\" does not exist!", RawFilePath);
-                    return false;
-                }
-
-                var thresholds = CompoundThresholdData.ReadFromFile(CompoundThresholdFilePath);
-                CompoundThresholds.AddRange(thresholds);
-                CompoundThresholdsLookup = CompoundThresholdData.ConvertToSearchMap(CompoundThresholds);
+                Console.WriteLine("ERROR: Custom compound threshold file \"{0}\" does not exist!", CompoundThresholdFilePath);
+                return false;
             }
 
             if (!string.IsNullOrWhiteSpace(OutputFolder) && !Directory.Exists(OutputFolder))

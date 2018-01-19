@@ -1,0 +1,108 @@
+﻿<Window x:Class="SrmHeavyChecker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SrmHeavyChecker"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance {x:Type local:MainWindowViewModel}, IsDesignTimeCreatable=True}"
+        Title="SRM Heavy QC Processor" Height="600" Width="800">
+    <Grid>
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" MinHeight="200" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Grid.Column="0" ><!--Visibility="{Binding IsNotRunning, Converter={StaticResource BoolToVis}}" -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" MinHeight="100" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+                <TextBlock DockPanel.Dock="Left" Margin="3" Text="Work Folder:" />
+                <Button DockPanel.Dock="Right" Margin="3" Content="Browse" Command="{Binding BrowseForFolderCommand}" />
+                <TextBox DockPanel.Dock="Left" Margin="3" Text="{Binding WorkFolder}" />
+            </DockPanel>
+            <DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+                <CheckBox DockPanel.Dock="Left" Margin="3" VerticalAlignment="Center" Content="Include Subfolders" IsChecked="{Binding WorkFolderRecurse}" />
+                <CheckBox DockPanel.Dock="Left" Margin="3" VerticalAlignment="Center" Content="Exclude x__* datasets" IsChecked="{Binding ExcludeArchived}" />
+                <TextBlock DockPanel.Dock="Left" Margin="30,3,3,3" Text="Filter:" />
+                <TextBox DockPanel.Dock="Left" Margin="3" Text="{Binding AvailableDatasetsViewModel.FilterString, UpdateSourceTrigger=PropertyChanged}" />
+            </DockPanel>
+            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="Available Datasets" Grid.ColumnSpan="2" />
+            <local:DatasetGridView Grid.Row="3" Grid.Column="0" Margin="3" DataContext="{Binding AvailableDatasetsViewModel}" />
+            <TextBlock Grid.Row="2" Grid.Column="2" Margin="3" Text="Datasets to Process" />
+            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" Margin="0,22">
+                <Button Margin="3" Content="&gt;&gt;" MinWidth="30" Command="{Binding MoveToQueueCommand}" />
+                <Button Margin="3" Content="&lt;&lt;" MinWidth="30" Command="{Binding RemoveFromQueueCommand}" />
+            </StackPanel>
+            <local:DatasetGridView Grid.Row="3" Grid.Column="2" Margin="3" DataContext="{Binding DatasetsToProcessViewModel}" />
+            <DockPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" LastChildFill="False">
+                <Button DockPanel.Dock="Left" Margin="3" Content="Refresh" Command="{Binding RefreshDatasetsCommand}" />
+                <Button DockPanel.Dock="Left" Margin="3" Content="Reset" Command="{Binding ResetDatasetsCommand}" />
+            </DockPanel>
+            <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Max Threads" />
+                <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Margin="3" Minimum="1" Maximum="{Binding Options.MaxThreadsUsable}" Value="{Binding Options.MaxThreads}" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="PPM Tolerance" />
+                <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Margin="3" Minimum="1" Value="{Binding Options.PpmTolerance}" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum peak area to pass" />
+                <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Margin="3" Minimum="1" Value="{Binding Options.DefaultThreshold}" />
+                <CheckBox Grid.Row="3" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Output Folder" IsChecked="{Binding Options.UseOutputFolder}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Options.OutputFolder}" />
+                <Button Grid.Row="3" Grid.Column="2" Margin="3" Content="Browse" Command="{Binding BrowseForOutputFolderCommand}" />
+                <CheckBox Grid.Row="4" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Use per-compound thresholds" IsChecked="{Binding Options.UseCompoundThresholdsFile}" />
+                <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Options.CompoundThresholdFilePath}" />
+                <Button Grid.Row="4" Grid.Column="2" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsFileCommand}" />
+                <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="3" TextWrapping="Wrap"
+                           Text="Requires a tab-separated file with the columns 'Compound Name' (req), 'Threshold' (req), and 'Precursor (m/z)' (opt). These override the minimum peak area for matching compounds."
+                           Visibility="{Binding Options.UseCompoundThresholdsFile, Converter={StaticResource BoolToVis}}" />
+            </Grid>
+        </Grid>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" TextWrapping="Wrap" Text="{Binding ValidationError}" />
+        <DockPanel Grid.Row="2" Grid.Column="0">
+            <Button DockPanel.Dock="Right" Margin="3" Content="Close" IsCancel="True" Click="Close_OnClick" ClickMode="Release" />
+            <Button DockPanel.Dock="Right" Margin="3" Content="Process Datasets" Command="{Binding ProcessDatasetsCommand}" />
+            <Button DockPanel.Dock="Right" Margin="3" Content="Cancel Processing" Command="{Binding CancelCommand}" />
+            <TextBlock Margin="3" Text="{Binding Status}">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusIsError}" Value="true">
+                                <Setter Property="Foreground" Value="Red" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                                <Setter Property="HorizontalAlignment" Value="Center" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </DockPanel>
+    </Grid>
+</Window>

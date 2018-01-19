@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="SrmHeavyChecker.DatasetGridView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:SrmHeavyChecker"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance {x:Type local:DatasetGridViewModel}, IsDesignTimeCreatable=True}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <DataGrid AutoGenerateColumns="False"
+              ItemsSource="{Binding Data}"
+              CanUserResizeRows="False" CanUserDeleteRows="False" CanUserAddRows="False"
+              SelectionMode="Extended"
+              CanUserSortColumns="True"
+              SelectedItem="{Binding SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+              SelectionChanged="Selector_OnSelectionChanged">
+        <DataGrid.CellStyle>
+            <Style TargetType="{x:Type DataGridCell}" >
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding UpdateError}" Value="True">
+                        <Setter Property="Background" Value="Red" />
+                        <Setter Property="FontWeight" Value="Bold" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding DatasetUpdated}" Value="True">
+                        <Setter Property="Background" Value="ForestGreen" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ProcessingWarning}" Value="True">
+                        <Setter Property="Background" Value="Yellow" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </DataGrid.CellStyle>
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="Dataset Name" Binding="{Binding DatasetName}" IsReadOnly="True" />
+            <!--<DataGridTextColumn Header="Acq. Date" Binding="{Binding AcquisitionDate}" IsReadOnly="True" SortDirection="Ascending" />-->
+            <DataGridTextColumn Header="Path" Binding="{Binding FilePath}" IsReadOnly="True" />
+            <DataGridTextColumn Header="Update Note" Binding="{Binding UpdateNote}" IsReadOnly="True" />
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

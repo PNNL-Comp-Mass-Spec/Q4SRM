@@ -1,16 +1,28 @@
 ﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Threading;
 using PRISM;
-using SrmHeavyQC;
 
 namespace SrmHeavyChecker
 {
     public class Program
     {
+        [DllImport("kernel32.dll")]
+        static extern bool FreeConsole();
+
+        [STAThread]
         public static void Main(string[] args)
         {
-            var parser = new CommandLineParser<Options>();
+            if (args.Length == 0)
+            {
+                FreeConsole();
+                // Run GUI
+                new App().Run();
+                return;
+            }
+
+            // Run command-line
+            var parser = new CommandLineParser<CmdLineOptions>();
             var parsed = parser.ParseArgs(args);
             var options = parsed.ParsedResults;
 
@@ -19,58 +31,23 @@ namespace SrmHeavyChecker
                 return;
             }
 
-            RunProcessing(options);
-        }
-
-        public static void RunProcessing(Options options)
-        {
-            if (options.MaxThreads == 1 || options.FilesToProcess.Count == 1)
+            var cancelTokenSource = new CancellationTokenSource();
+            // Handle Ctrl-C in a graceful way
+            Console.CancelKeyPress += (sender, eventArgs) =>
             {
-                foreach (var file in options.FilesToProcess)
+                if (cancelTokenSource.IsCancellationRequested)
                 {
-                    ProcessFile(options, file);
-                }
-            }
-            else
-            {
-                var parallelOptions = new ParallelOptions()
-                {
-                    MaxDegreeOfParallelism = options.MaxThreads,
-                };
-                Parallel.ForEach(options.FilesToProcess, parallelOptions, x => ProcessFile(options, x));
-            }
-        }
-
-        private static void ProcessFile(Options options, string rawFilePath)
-        {
-            Console.WriteLine("Processing file \"{0}\"", rawFilePath);
-            using (var rawReader = new XCalDataReader(rawFilePath))
-            {
-                var results = rawReader.ReadRawData(options.PpmTolerance);
-                if (results == null)
-                {
+                    Console.WriteLine(@"Force closing...");
                     return;
                 }
-                //Console.WriteLine("File \"{0}\": RawResults: {1}", rawFilePath, results.Count);
-                var combined = rawReader.AggregateResults(results, options.DefaultThreshold, options.CompoundThresholdsLookup);
-                //Console.WriteLine("File \"{0}\": CombinedResults: {1}", rawFilePath, combined.Count);
 
-                var outputFileName = Path.GetFileNameWithoutExtension(rawFilePath) + "_heavyPeaks.tsv";
-                var outputFolder = Path.GetDirectoryName(rawFilePath);
-                if (!string.IsNullOrWhiteSpace(options.OutputFolder))
-                {
-                    outputFolder = options.OutputFolder;
-                }
-                else if (string.IsNullOrWhiteSpace(outputFolder))
-                {
-                    outputFolder = ".";
-                }
+                eventArgs.Cancel = true;
+                Console.WriteLine(@"Exiting when currently processing item(s) complete. Press Ctrl-C again to kill now.");
+                cancelTokenSource.Cancel();
+            };
 
-                var outputFilePath = Path.Combine(outputFolder, outputFileName);
-
-                SrmCombinedResult.WriteCombinedResultsToFile(outputFilePath, combined);
-            }
-            Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
+            var processor = new FileProcessor();
+            processor.RunProcessing(options, cancelTokenSource);
         }
     }
 }
