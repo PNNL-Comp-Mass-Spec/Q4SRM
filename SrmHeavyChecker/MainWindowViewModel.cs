@@ -15,7 +15,7 @@ namespace SrmHeavyChecker
     {
         private readonly List<DatasetInfo> datasets = new List<DatasetInfo>();
         private string workFolder;
-        private bool excludeArchived;
+        private bool excludeArchived = true;
         private bool workFolderRecurse;
         private bool isNotRunning;
         private string status;

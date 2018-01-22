@@ -65,7 +65,8 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1*" MinWidth="70" />
+                    <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Max Threads" />
@@ -75,12 +76,12 @@
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum peak area to pass" />
                 <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Margin="3" Minimum="1" Value="{Binding Options.DefaultThreshold}" />
                 <CheckBox Grid.Row="3" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Output Folder" IsChecked="{Binding Options.UseOutputFolder}" />
-                <TextBox Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Options.OutputFolder}" />
-                <Button Grid.Row="3" Grid.Column="2" Margin="3" Content="Browse" Command="{Binding BrowseForOutputFolderCommand}" />
+                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.OutputFolder}" />
+                <Button Grid.Row="3" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForOutputFolderCommand}" />
                 <CheckBox Grid.Row="4" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Use per-compound thresholds" IsChecked="{Binding Options.UseCompoundThresholdsFile}" />
-                <TextBox Grid.Row="4" Grid.Column="1" Margin="3" Text="{Binding Options.CompoundThresholdFilePath}" />
-                <Button Grid.Row="4" Grid.Column="2" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsFileCommand}" />
-                <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Margin="3" TextWrapping="Wrap"
+                <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.CompoundThresholdFilePath}" />
+                <Button Grid.Row="4" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsFileCommand}" />
+                <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap"
                            Text="Requires a tab-separated file with the columns 'Compound Name' (req), 'Threshold' (req), and 'Precursor (m/z)' (opt). These override the minimum peak area for matching compounds."
                            Visibility="{Binding Options.UseCompoundThresholdsFile, Converter={StaticResource BoolToVis}}" />
             </Grid>
