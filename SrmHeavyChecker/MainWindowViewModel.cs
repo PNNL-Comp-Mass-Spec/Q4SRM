@@ -131,6 +131,7 @@ namespace SrmHeavyChecker
             var processor = new FileProcessor();
             await Task.Run(() => processor.RunProcessing(Options, cancellationTokenSrc));
             IsNotRunning = true;
+            Status = "Finished processing datasets.";
         }
 
         private void BrowseForFolder()
