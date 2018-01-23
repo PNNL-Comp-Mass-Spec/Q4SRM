@@ -21,8 +21,12 @@ namespace SrmHeavyQC
         public double Trigger { get; set; }
         public string Reference { get; set; }
 
+        public double MaxIntensity { get; set; }
+        public double MaxIntensityTime { get; set; }
         public double IntensitySum { get; set; }
-        public double Ratio { get; set; }
+        public double RatioOfCompoundTotalIntensity { get; set; }
+
+        public List<double> Intensities { get; } = new List<double>();
 
         public string CompoundName
         {
@@ -93,7 +97,7 @@ namespace SrmHeavyQC
             {
                 Map(x => x.ProductMz).Name("m/z");
                 Map(x => x.IntensitySum).Name("area");
-                Map(x => x.Ratio).Name("ratio");
+                Map(x => x.RatioOfCompoundTotalIntensity).Name("ratio");
             }
         }
     }

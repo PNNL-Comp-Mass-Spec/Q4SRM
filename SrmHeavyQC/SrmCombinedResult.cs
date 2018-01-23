@@ -13,13 +13,21 @@ namespace SrmHeavyQC
         public double StartTimeMinutes { get; }
         public double StopTimeMinutes { get; }
 
-        public double TotalArea { get; private set; }
+        public double TotalIntensitySum { get; private set; }
+        public double MaxIntensity { get; private set; }
+        public double IntensityRatioMaxVsMedian { get; private set; }
+        public double MedianIntensity { get; private set; }
+
+        /// <summary>
+        /// The time of the max intensity, normalized to the compound elution time window
+        /// </summary>
+        public double MaxIntensityNet { get; private set; }
 
         public double Threshold { get; set; }
 
         public bool PassesThreshold
         {
-            get { return TotalArea >= Threshold; }
+            get { return TotalIntensitySum >= Threshold; }
         }
 
         public List<TransitionData> Transitions { get; }
@@ -30,7 +38,7 @@ namespace SrmHeavyQC
             PrecursorMz = data.PrecursorMz;
             StartTimeMinutes = data.StartTimeMinutes;
             StopTimeMinutes = data.StopTimeMinutes;
-            TotalArea = 0;
+            TotalIntensitySum = 0;
             Transitions = new List<TransitionData>();
         }
 
@@ -66,9 +74,9 @@ namespace SrmHeavyQC
 
         private void CalculateSummaryData()
         {
-            TotalArea = Transitions.Sum(x => x.IntensitySum);
+            TotalIntensitySum = Transitions.Sum(x => x.IntensitySum);
 
-            if (TotalArea.Equals(0))
+            if (TotalIntensitySum.Equals(0))
             {
                 // Avoid divide by zero
                 return;
@@ -76,7 +84,36 @@ namespace SrmHeavyQC
 
             foreach (var transition in Transitions)
             {
-                transition.Ratio = transition.IntensitySum / TotalArea;
+                transition.RatioOfCompoundTotalIntensity = transition.IntensitySum / TotalIntensitySum;
+            }
+
+            var maxIntTrans = Transitions.OrderByDescending(x => x.MaxIntensity).First();
+            MaxIntensity = maxIntTrans.MaxIntensity;
+            MaxIntensityNet = (maxIntTrans.MaxIntensityTime - maxIntTrans.StartTimeMinutes) / (maxIntTrans.StopTimeMinutes - maxIntTrans.StartTimeMinutes);
+            var fullIntensityList = new List<double>();
+            foreach (var result in Transitions)
+            {
+                fullIntensityList.AddRange(result.Intensities);
+            }
+            fullIntensityList.Sort();
+            if (fullIntensityList.Count % 2 == 0)
+            {
+                // even number of items, must average the middle 2
+                var int1 = fullIntensityList[fullIntensityList.Count / 2];
+                var int2 = fullIntensityList[fullIntensityList.Count / 2 + 1];
+                MedianIntensity = (int1 + int2) / 2.0;
+            }
+            else
+            {
+                // odd number of items, integer division will give us the center index
+                MedianIntensity = fullIntensityList[fullIntensityList.Count / 2];
+            }
+
+            IntensityRatioMaxVsMedian = MaxIntensity / MedianIntensity;
+            if (double.IsInfinity(IntensityRatioMaxVsMedian) || IntensityRatioMaxVsMedian > MaxIntensity)
+            {
+                //System.Console.WriteLine("InfinityEncountered!: {0} MaxInt: {1} Median {2}");
+                IntensityRatioMaxVsMedian = MaxIntensity;
             }
         }
 
@@ -118,8 +155,12 @@ namespace SrmHeavyQC
                 Map(x => x.PrecursorMz).Name("Precursor m/z").Index(index++);
                 Map(x => x.StartTimeMinutes).Name("Start Time (min)").Index(index++);
                 Map(x => x.StopTimeMinutes).Name("Stop Time (min)").Index(index++);
-                Map(x => x.TotalArea).Name("Summed Area").Index(index++);
+                Map(x => x.TotalIntensitySum).Name("TotalIntensity").Index(index++);
                 Map(x => x.PassesThreshold).Name("Passes Threshold").Index(index++);
+                Map(x => x.MaxIntensity).Name("IntensityMax").Index(index++);
+                Map(x => x.MaxIntensityNet).Name("IntensityMaxNET").Index(index++);
+                Map(x => x.IntensityRatioMaxVsMedian).Name("IntensityRatioMaxVsMedian");
+                Map(x => x.MedianIntensity).Name("IntensityMedian").Index(index++);
                 /*/
                 for (var i = 0; i < maxTransitionCount; i++)
                 {
