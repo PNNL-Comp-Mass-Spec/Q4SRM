@@ -155,12 +155,12 @@ namespace SrmHeavyQC
                 Map(x => x.PrecursorMz).Name("Precursor m/z").Index(index++);
                 Map(x => x.StartTimeMinutes).Name("Start Time (min)").Index(index++);
                 Map(x => x.StopTimeMinutes).Name("Stop Time (min)").Index(index++);
-                Map(x => x.TotalIntensitySum).Name("TotalIntensity").Index(index++);
+                Map(x => x.TotalIntensitySum).Name("TotalIntensity").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 Map(x => x.PassesThreshold).Name("Passes Threshold").Index(index++);
-                Map(x => x.MaxIntensity).Name("IntensityMax").Index(index++);
-                Map(x => x.MaxIntensityNet).Name("IntensityMaxNET").Index(index++);
-                Map(x => x.IntensityRatioMaxVsMedian).Name("IntensityRatioMaxVsMedian");
-                Map(x => x.MedianIntensity).Name("IntensityMedian").Index(index++);
+                Map(x => x.MaxIntensity).Name("IntensityMax").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MaxIntensityNet).Name("IntensityMaxNET").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.IntensityRatioMaxVsMedian).Name("IntensityRatioMaxVsMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MedianIntensity).Name("IntensityMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 /*/
                 for (var i = 0; i < maxTransitionCount; i++)
                 {

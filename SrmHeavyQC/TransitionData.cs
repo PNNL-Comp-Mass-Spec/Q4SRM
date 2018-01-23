@@ -96,8 +96,8 @@ namespace SrmHeavyQC
             public TransitionSummaryDataMap()
             {
                 Map(x => x.ProductMz).Name("m/z");
-                Map(x => x.IntensitySum).Name("area");
-                Map(x => x.RatioOfCompoundTotalIntensity).Name("ratio");
+                Map(x => x.IntensitySum).Name("totalIntensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.RatioOfCompoundTotalIntensity).Name("ratio").TypeConverter<DecimalLimitingDoubleTypeConverter>();
             }
         }
     }
