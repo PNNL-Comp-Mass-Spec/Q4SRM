@@ -10,7 +10,6 @@ namespace SrmHeavyChecker
         private string rawFilePath;
         private double defaultThreshold;
         private string compoundThresholdFilePath;
-        private double ppmTolerance;
         private string outputFolder;
         private int maxThreads;
         private bool useOutputFolder;
@@ -32,12 +31,6 @@ namespace SrmHeavyChecker
         {
             get { return compoundThresholdFilePath; }
             set { this.RaiseAndSetIfChanged(ref compoundThresholdFilePath, value); }
-        }
-
-        public double PpmTolerance
-        {
-            get { return ppmTolerance; }
-            set { this.RaiseAndSetIfChanged(ref ppmTolerance, value); }
         }
 
         public string OutputFolder
@@ -74,7 +67,6 @@ namespace SrmHeavyChecker
             RawFilePath = "";
             CompoundThresholdFilePath = "";
             DefaultThreshold = 20;
-            PpmTolerance = 20;
             MaxThreads = SystemInfo.GetCoreCount();
             UseOutputFolder = false;
             UseCompoundThresholdsFile = false;

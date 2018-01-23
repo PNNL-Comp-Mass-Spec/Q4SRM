@@ -4,40 +4,27 @@ using System.Linq;
 using ThermoFisher.CommonCore.Data;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoFisher.CommonCore.Data.Interfaces;
-using ThermoRawFileReader;
 
 namespace SrmHeavyQC
 {
     public class XCalDataReader : IDisposable
     {
         public string RawFilePath { get; }
-        private XRawFileIO pnnlRawReaderAdapter = null;
         //private IRawDataPlus rawReader = null;
         private IRawFileThreadManager rawReaderThreader = null;
-        private bool useThermoRawFileReader = false;
+        private bool canUseCompoundNames = false;
 
-        public XCalDataReader(string rawFilePath, bool usePNNLReaderAdapter = false)
+        public XCalDataReader(string rawFilePath)
         {
             RawFilePath = rawFilePath;
 
-            useThermoRawFileReader = usePNNLReaderAdapter;
-            if (useThermoRawFileReader)
-            {
-                pnnlRawReaderAdapter = new XRawFileIO();
-                pnnlRawReaderAdapter.LoadMSMethodInfo = true;
-                pnnlRawReaderAdapter.ScanInfoCacheMaxSize = 1;
-                pnnlRawReaderAdapter.OpenRawFile(RawFilePath);
-            }
-            else
-            {
-                //rawReader = RawFileReaderFactory.ReadFile(rawFilePath);
-                rawReaderThreader = RawFileReaderFactory.CreateThreadManager(rawFilePath);
-            }
+            //rawReader = RawFileReaderFactory.ReadFile(rawFilePath);
+            rawReaderThreader = RawFileReaderFactory.CreateThreadManager(rawFilePath);
         }
 
-        public List<SrmResult> ReadRawData(double tolerancePpm = 20)
+        public List<SrmTableData> ReadRawData()
         {
-            var srmTransitions = GetHeavyTransitions().Select(x => new SrmResult(x, tolerancePpm)).ToList();
+            var srmTransitions = GetHeavyTransitions().ToList();
             //Console.WriteLine($"File \"{RawFilePath}\": {srmTransitions.Count} heavy transitions in instrument method.");
             if (srmTransitions.Count == 0)
             {
@@ -49,108 +36,72 @@ namespace SrmHeavyQC
             //srmTransitions = temp;
             // TODO: Could determine heavy peptides by checking names vs. precursor m/z?
             var scanTimes = new Dictionary<int, double>();
-            if (useThermoRawFileReader)
+            var combSrmTransitions = JoinTransitions(srmTransitions);
+            using (var rawReader = rawReaderThreader.CreateThreadAccessor())
             {
-                var numScans = pnnlRawReaderAdapter.GetNumScans();
+                if (!rawReader.SelectMsData())
+                {
+                    // dataset has no MS data. Return.
+                    return null;
+                }
+
+                var header = rawReader.RunHeaderEx;
+                var minScan = header.FirstSpectrum;
+                var maxScan = header.LastSpectrum;
+                var numScans = header.SpectraCount;
                 for (var i = 1; i <= numScans; i++)
                 {
-                    pnnlRawReaderAdapter.GetRetentionTime(i, out var time);
+                    var time = rawReader.RetentionTimeFromScanNumber(i);
                     scanTimes.Add(i, time);
+                    // Filter string parsing for speed: "+ c NSI SRM ms2 [precursor/parent m/z] [[list of product m/z ranges]]
                 }
 
                 // Map transition start/stop times to scans
-                var scansAndTargets = new Dictionary<int, List<SrmResult>>();
+                var scansAndTargets = new Dictionary<int, List<CompoundTransitions>>();
                 foreach (var scan in scanTimes)
                 {
-                    var matches = srmTransitions.Where(x => x.Transition.StartTimeMinutes <= scan.Value && scan.Value <= x.Transition.StopTimeMinutes)
-                        .ToList();
+                    var matches = combSrmTransitions.Values
+                        .Where(x => x.StartTimeMinutes <= scan.Value && scan.Value <= x.StopTimeMinutes).ToList();
                     if (matches.Count > 0)
                     {
                         scansAndTargets.Add(scan.Key, matches);
                     }
                 }
 
+                // This works for the Altis file, but not for the Vantage file
+                // Should be able to key on 'canUseCompoundNames'
+                //var compounds = rawReader.GetCompoundNames();
+
                 // read spectra data for each transition from the file, in an optimized fashion
                 foreach (var scan in scansAndTargets)
                 {
-                    //pnnlRawReaderAdapter.GetScanData2D(scan.Key, out var massIntensity, 0, true);
-                    pnnlRawReaderAdapter.GetScanData2D(scan.Key, out var massIntensity, 0, false);
-                    //var peaks = new List<Peak>();
-                    //for (var i = 0; i < massIntensity.GetLength(1); i++)
-                    //{
-                    //    peaks.Add(new Peak(massIntensity[0,i], massIntensity[1,i]));
-                    //}
-                    //
-                    //foreach (var target in scan.Value)
-                    //{
-                    //    var result = new SpectrumSection(scan.Key);
-                    //    result.SpectrumPeaks.AddRange(peaks.Where(x => target.MinMz <= x.Mz && x.Mz <= target.MaxMz));
-                    //    if (result.SpectrumPeaks.Count > 0)
-                    //    {
-                    //        target.SpectraResults.Add(result);
-                    //    }
-                    //}
+                    // This works for the Altis file, but not for the Vantage file
+                    //var scanInfoX = rawReader.GetScanFiltersFromCompoundName(scan.Value[0].Transition.CompoundName);
+                    var scanInfo = rawReader.GetFilterForScanNumber(scan.Key);
+                    var reaction = scanInfo.GetReaction(0);
+                    var preMz = reaction.PrecursorMass;
+                    var data = rawReader.GetSimplifiedScan(scan.Key);
 
-                    for (var i = 0; i < massIntensity.GetLength(1); i++)
+                    foreach (var compound in scan.Value.Where(x => Math.Abs(x.PrecursorMz - preMz) < 0.01))
                     {
-                        var mz = massIntensity[0, i];
-                        var intensity = massIntensity[1, i];
-                        foreach (var target in scan.Value.Where(x => x.MinMz <= mz && mz <= x.MaxMz))
+                        for (var i = 0; i < scanInfo.MassRangeCount; i++)
                         {
-                            target.Area += intensity;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                using (var rawReader = rawReaderThreader.CreateThreadAccessor())
-                {
-                    if (!rawReader.SelectMsData())
-                    {
-                        // dataset has no MS data. Return.
-                        return null;
-                    }
-
-                    var header = rawReader.RunHeaderEx;
-                    var minScan = header.FirstSpectrum;
-                    var maxScan = header.LastSpectrum;
-                    var numScans = header.SpectraCount;
-                    for (var i = 1; i <= numScans; i++)
-                    {
-                        var time = rawReader.RetentionTimeFromScanNumber(i);
-                        scanTimes.Add(i, time);
-                        // Filter string parsing for speed: "+ c NSI SRM ms2 [precursor/parent m/z] [[list of product m/z ranges]]
-                    }
-
-                    // Map transition start/stop times to scans
-                    var scansAndTargets = new Dictionary<int, List<SrmResult>>();
-                    foreach (var scan in scanTimes)
-                    {
-                        var matches = srmTransitions
-                            .Where(x => x.Transition.StartTimeMinutes <= scan.Value && scan.Value <= x.Transition.StopTimeMinutes)
-                            .ToList();
-                        if (matches.Count > 0)
-                        {
-                            scansAndTargets.Add(scan.Key, matches);
-                        }
-                    }
-
-                    // read spectra data for each transition from the file, in an optimized fashion
-                    foreach (var scan in scansAndTargets)
-                    {
-                        //var scanInfo = rawReader.GetScanFiltersFromCompoundName(xxx);
-                        var scanInfo = rawReader.GetFilterForScanNumber(scan.Key);
-                        //var massRangeCount = scanInfo.MassRangeCount;
-                        //var massRange1 = scanInfo.GetMassRange(0);
-                        var data = rawReader.GetSimplifiedScan(scan.Key);
-                        for (var i = 0; i < data.Masses.Length; i++)
-                        {
-                            var mz = data.Masses[i];
-                            var intensity = data.Intensities[i];
-                            foreach (var target in scan.Value.Where(x => x.MinMz <= mz && mz <= x.MaxMz))
+                            var massRange = scanInfo.GetMassRange(i);
+                            var match = compound.Transitions.FirstOrDefault(x => massRange.Low <= x.ProductMz && x.ProductMz <= massRange.High);
+                            if (match == null)
                             {
-                                target.Area += intensity;
+                                continue;
+                            }
+
+                            for (var j = 0; j < data.Masses.Length; j++)
+                            {
+                                var mz = data.Masses[j];
+                                var intensity = data.Intensities[j];
+
+                                if (massRange.Low <= mz && mz <= massRange.High)
+                                {
+                                    match.IntensitySum += intensity;
+                                }
                             }
                         }
                     }
@@ -160,7 +111,23 @@ namespace SrmHeavyQC
             return srmTransitions;
         }
 
-        public List<SrmCombinedResult> AggregateResults(IEnumerable<SrmResult> results, double threshold, Dictionary<string, CompoundThresholdData> compoundThresholds = null)
+        private Dictionary<string, CompoundTransitions> JoinTransitions(List<SrmTableData> data)
+        {
+            var combined = new Dictionary<string, CompoundTransitions>();
+            foreach (var item in data)
+            {
+                if (!combined.TryGetValue(item.CompoundName, out var group))
+                {
+                    group = new CompoundTransitions(item);
+                    combined.Add(group.CompoundName, group);
+                }
+                group.Transitions.Add(item);
+            }
+
+            return combined;
+        }
+
+        public List<SrmCombinedResult> AggregateResults(IEnumerable<SrmTableData> results, double threshold, Dictionary<string, CompoundThresholdData> compoundThresholds = null)
         {
             if (compoundThresholds == null)
             {
@@ -170,15 +137,15 @@ namespace SrmHeavyQC
             foreach (var result in results)
             {
                 SrmCombinedResult group;
-                if (!combinedMap.TryGetValue(result.Transition.CompoundName, out group))
+                if (!combinedMap.TryGetValue(result.CompoundName, out group))
                 {
-                    group = new SrmCombinedResult(result.Transition) {Threshold = threshold};
+                    group = new SrmCombinedResult(result) {Threshold = threshold};
                     // Look for and handle custom thresholds
-                    if (compoundThresholds.TryGetValue(result.Transition.CompoundName, out var cThreshold))
+                    if (compoundThresholds.TryGetValue(result.CompoundName, out var cThreshold))
                     {
                         group.Threshold = cThreshold.Threshold;
                     }
-                    combinedMap.Add(result.Transition.CompoundName, group);
+                    combinedMap.Add(result.CompoundName, group);
                 }
 
                 group.AddTransition(result);
@@ -204,32 +171,23 @@ namespace SrmHeavyQC
         public List<SrmTableData> GetAllTransitions()
         {
             var srmTransitions = new List<SrmTableData>();
-            if (useThermoRawFileReader)
+            using (var rawReader = rawReaderThreader.CreateThreadAccessor())
             {
-                //Console.WriteLine($"File \"{RawFilePath}\": {pnnlRawReaderAdapter.FileInfo.InstMethods.Count} instrument methods");
-                foreach (var method in pnnlRawReaderAdapter.FileInfo.InstMethods)
+                //Console.WriteLine($"File \"{RawFilePath}\": {rawReader.InstrumentMethodsCount} instrument methods");
+                for (var i = 0; i < rawReader.InstrumentMethodsCount; i++)
                 {
+                    var method = rawReader.GetInstrumentMethod(i);
                     //Console.WriteLine($"File \"{RawFilePath}\": InstMethod string length: {method.Length}");
-                    var parsed = new XCalInstMethod(method);
-                    srmTransitions.AddRange(parsed.ParseSrmTable());
-                }
-            }
-            else
-            {
-                using (var rawReader = rawReaderThreader.CreateThreadAccessor())
-                {
-                    //Console.WriteLine($"File \"{RawFilePath}\": {rawReader.InstrumentMethodsCount} instrument methods");
-                    for (var i = 0; i < rawReader.InstrumentMethodsCount; i++)
+                    if (string.IsNullOrWhiteSpace(method))
                     {
-                        var method = rawReader.GetInstrumentMethod(i);
-                        //Console.WriteLine($"File \"{RawFilePath}\": InstMethod string length: {method.Length}");
-                        if (string.IsNullOrWhiteSpace(method))
-                        {
-                            continue;
-                        }
-                        var parsed = new XCalInstMethod(method);
-                        srmTransitions.AddRange(parsed.ParseSrmTable());
+                        continue;
                     }
+                    var parsed = new XCalInstMethod(method);
+                    if (parsed.UsesCompoundName)
+                    {
+                        canUseCompoundNames = true;
+                    }
+                    srmTransitions.AddRange(parsed.ParseSrmTable());
                 }
             }
 
@@ -239,11 +197,6 @@ namespace SrmHeavyQC
 
         private void CloseReader()
         {
-            if (pnnlRawReaderAdapter != null)
-            {
-                pnnlRawReaderAdapter.Dispose();
-                pnnlRawReaderAdapter = null;
-            }
             //if (rawReader != null)
             //{
             //    rawReader.Dispose();

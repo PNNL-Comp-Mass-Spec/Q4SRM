@@ -10,8 +10,6 @@ namespace SrmHeavyChecker
 
         string CompoundThresholdFilePath { get; set; }
 
-        double PpmTolerance { get; set; }
-
         string OutputFolder { get; set; }
 
         int MaxThreads { get; set; }

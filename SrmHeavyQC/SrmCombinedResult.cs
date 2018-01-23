@@ -22,7 +22,7 @@ namespace SrmHeavyQC
             get { return TotalArea >= Threshold; }
         }
 
-        public List<SrmResult> TransitionResults { get; }
+        public List<SrmTableData> TransitionResults { get; }
         public List<TransitionSummaryData> TransitionSummaries { get; }
 
         public SrmCombinedResult(SrmTableData data)
@@ -32,7 +32,7 @@ namespace SrmHeavyQC
             StartTimeMinutes = data.StartTimeMinutes;
             StopTimeMinutes = data.StopTimeMinutes;
             TotalArea = 0;
-            TransitionResults = new List<SrmResult>();
+            TransitionResults = new List<SrmTableData>();
             TransitionSummaries = new List<TransitionSummaryData>();
         }
 
@@ -47,7 +47,7 @@ namespace SrmHeavyQC
         //    }
         //}
 
-        public void AddTransition(SrmResult result)
+        public void AddTransition(SrmTableData result)
         {
             if (result == null)
             {
@@ -69,7 +69,7 @@ namespace SrmHeavyQC
 
         private void CalculateSummaryData()
         {
-            TotalArea = TransitionResults.Sum(x => x.Area);
+            TotalArea = TransitionResults.Sum(x => x.IntensitySum);
 
             if (TotalArea.Equals(0))
             {
@@ -78,7 +78,7 @@ namespace SrmHeavyQC
             }
 
             TransitionSummaries.Clear();
-            TransitionSummaries.AddRange(TransitionResults.Select(x => new TransitionSummaryData(x.Transition.ProductMz, x.Area, x.Area / TotalArea)));
+            TransitionSummaries.AddRange(TransitionResults.Select(x => new TransitionSummaryData(x.ProductMz, x.IntensitySum, x.IntensitySum / TotalArea)));
         }
 
         public TransitionSummaryData Transition1Summary => TransitionSummaries.Count >= 1 ? TransitionSummaries[0] : new TransitionSummaryData();

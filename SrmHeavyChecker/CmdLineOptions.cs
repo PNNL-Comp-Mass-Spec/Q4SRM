@@ -23,9 +23,6 @@ namespace SrmHeavyChecker
         [Option("tpc", Required = false, HelpText = "A TSV file with compound and threshold columns, for custom thresholds for the specified compounds")]
         public string CompoundThresholdFilePath { get; set; }
 
-        [Option("ppmTol", Required = false, HelpText = "PPM tolerance for matching peaks to compounds", Min = 0)]
-        public double PpmTolerance { get; set; }
-
         [Option("out", Required = false, HelpText = "Folder where the result files should be written (default: written to same folder as .raw)", HelpShowsDefault = false)]
         public string OutputFolder { get; set; }
 
@@ -40,7 +37,6 @@ namespace SrmHeavyChecker
             RawFilePath = "";
             CompoundThresholdFilePath = "";
             DefaultThreshold = 20;
-            PpmTolerance = 20;
             FilesToProcessList = new List<string>();
             Recurse = false;
             FileFilter = "*.raw";

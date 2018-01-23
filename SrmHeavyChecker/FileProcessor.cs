@@ -63,7 +63,7 @@ namespace SrmHeavyChecker
             Console.WriteLine("Processing file \"{0}\"", rawFilePath);
             using (var rawReader = new XCalDataReader(rawFilePath))
             {
-                var results = rawReader.ReadRawData(options.PpmTolerance);
+                var results = rawReader.ReadRawData();
                 if (results == null)
                 {
                     return;

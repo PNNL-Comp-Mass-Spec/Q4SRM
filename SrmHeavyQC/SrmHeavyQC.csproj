@@ -54,16 +54,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\ThermoFisher.CommonCore.RawFileReader.dll</HintPath>
     </Reference>
-    <Reference Include="ThermoRawFileReader">
-      <HintPath>..\Lib\ThermoRawFileReader.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompoundThresholdData.cs" />
+    <Compile Include="CompoundTransitions.cs" />
     <Compile Include="Peak.cs" />
     <Compile Include="SpectrumSection.cs" />
     <Compile Include="SrmCombinedResult.cs" />
-    <Compile Include="SrmResult.cs" />
     <Compile Include="SrmTableData.cs" />
     <Compile Include="TransitionSummaryData.cs" />
     <Compile Include="XCalDataReader.cs" />

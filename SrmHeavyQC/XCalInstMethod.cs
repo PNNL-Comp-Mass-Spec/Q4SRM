@@ -11,6 +11,7 @@ namespace SrmHeavyQC
         public XCalInstMethod(string method)
         {
             DirtyMethod = method;
+            UsesCompoundName = false;
             ProcessMethod(method);
         }
 
@@ -18,6 +19,8 @@ namespace SrmHeavyQC
         public string Method => CleanedMethod;
         public string CleanedMethod { get; private set; }
         public string SrmTable { get; private set; }
+
+        public bool UsesCompoundName { get; private set; }
 
         public List<SrmTableData> ParseSrmTable()
         {
@@ -63,6 +66,7 @@ namespace SrmHeavyQC
 
                         if (line.Trim().StartsWith("Compound Name"))
                         {
+                            UsesCompoundName = true;
                             // Check for table with Altis
                             inTable = true;
                         }

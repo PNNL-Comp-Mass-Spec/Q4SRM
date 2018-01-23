@@ -21,6 +21,8 @@ namespace SrmHeavyQC
         public double Trigger { get; set; }
         public string Reference { get; set; }
 
+        public double IntensitySum { get; set; }
+
         public string CompoundName
         {
             get { return compoundName; }
