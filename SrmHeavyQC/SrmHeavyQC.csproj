@@ -60,7 +60,6 @@
     <Compile Include="CompoundTransitions.cs" />
     <Compile Include="SrmCombinedResult.cs" />
     <Compile Include="TransitionData.cs" />
-    <Compile Include="TransitionSummaryData.cs" />
     <Compile Include="XCalDataReader.cs" />
     <Compile Include="XCalInstMethod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -22,6 +22,7 @@ namespace SrmHeavyQC
         public string Reference { get; set; }
 
         public double IntensitySum { get; set; }
+        public double Ratio { get; set; }
 
         public string CompoundName
         {
@@ -83,6 +84,16 @@ namespace SrmHeavyQC
                 Map(x => x.Trigger).Name("Trigger").Default(-1);
                 Map(x => x.Reference).Name("Reference").Default("");
                 Map(x => x.CompoundName).Name("Compound Name", "Name");
+            }
+        }
+
+        public sealed class TransitionSummaryDataMap : ClassMap<TransitionData>
+        {
+            public TransitionSummaryDataMap()
+            {
+                Map(x => x.ProductMz).Name("m/z");
+                Map(x => x.IntensitySum).Name("area");
+                Map(x => x.Ratio).Name("ratio");
             }
         }
     }
