@@ -58,10 +58,8 @@
   <ItemGroup>
     <Compile Include="CompoundThresholdData.cs" />
     <Compile Include="CompoundTransitions.cs" />
-    <Compile Include="Peak.cs" />
-    <Compile Include="SpectrumSection.cs" />
     <Compile Include="SrmCombinedResult.cs" />
-    <Compile Include="SrmTableData.cs" />
+    <Compile Include="TransitionData.cs" />
     <Compile Include="TransitionSummaryData.cs" />
     <Compile Include="XCalDataReader.cs" />
     <Compile Include="XCalInstMethod.cs" />

@@ -6,7 +6,7 @@ using CsvHelper.Configuration;
 
 namespace SrmHeavyQC
 {
-    public class SrmTableData
+    public class TransitionData
     {
         //Parent	Product	CE	Start	Stop	Pol	Trigger	Reference	Name
         //Compound Name	Start Time (min)	End Time (min)	Polarity	Precursor (m/z)	Product (m/z)	Collision Energy (V)
@@ -48,7 +48,7 @@ namespace SrmHeavyQC
             return $"{CompoundName,-50} {PrecursorMz,10:F2} {ProductMz,10:F2} {StartTimeMinutes,10:F2} {StopTimeMinutes,10:F2}";
         }
 
-        public static IEnumerable<SrmTableData> ParseSrmTable(Stream stream)
+        public static IEnumerable<TransitionData> ParseSrmTable(Stream stream)
         {
             using (var csv = new CsvReader(new StreamReader(stream)))
             {
@@ -60,14 +60,14 @@ namespace SrmHeavyQC
                 csv.Configuration.Comment = '#';
                 csv.Configuration.AllowComments = true;
 
-                foreach (var record in csv.GetRecords<SrmTableData>())
+                foreach (var record in csv.GetRecords<TransitionData>())
                 {
                     yield return record;
                 }
             }
         }
 
-        public sealed class SrmTableDataMap : ClassMap<SrmTableData>
+        public sealed class SrmTableDataMap : ClassMap<TransitionData>
         {
             public SrmTableDataMap()
             {

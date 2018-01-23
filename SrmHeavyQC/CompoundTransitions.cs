@@ -10,9 +10,9 @@ namespace SrmHeavyQC
         public double StopTimeMinutes { get; }
         public string Polarity { get; }
         public double CollisionVolts { get; }
-        public List<SrmTableData> Transitions { get; }
+        public List<TransitionData> Transitions { get; }
 
-        public CompoundTransitions(SrmTableData transition)
+        public CompoundTransitions(TransitionData transition)
         {
             CompoundName = transition.CompoundName;
             PrecursorMz = transition.PrecursorMz;
@@ -20,7 +20,7 @@ namespace SrmHeavyQC
             StopTimeMinutes = transition.StopTimeMinutes;
             Polarity = transition.Polarity;
             CollisionVolts = transition.CollisionVolts;
-            Transitions = new List<SrmTableData>();
+            Transitions = new List<TransitionData>();
         }
     }
 }

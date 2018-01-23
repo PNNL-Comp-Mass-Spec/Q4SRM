@@ -22,7 +22,7 @@ namespace SrmHeavyQC
             rawReaderThreader = RawFileReaderFactory.CreateThreadManager(rawFilePath);
         }
 
-        public List<SrmTableData> ReadRawData()
+        public List<TransitionData> ReadRawData()
         {
             var srmTransitions = GetHeavyTransitions().ToList();
             //Console.WriteLine($"File \"{RawFilePath}\": {srmTransitions.Count} heavy transitions in instrument method.");
@@ -111,7 +111,7 @@ namespace SrmHeavyQC
             return srmTransitions;
         }
 
-        private Dictionary<string, CompoundTransitions> JoinTransitions(List<SrmTableData> data)
+        private Dictionary<string, CompoundTransitions> JoinTransitions(List<TransitionData> data)
         {
             var combined = new Dictionary<string, CompoundTransitions>();
             foreach (var item in data)
@@ -127,7 +127,7 @@ namespace SrmHeavyQC
             return combined;
         }
 
-        public List<SrmCombinedResult> AggregateResults(IEnumerable<SrmTableData> results, double threshold, Dictionary<string, CompoundThresholdData> compoundThresholds = null)
+        public List<SrmCombinedResult> AggregateResults(IEnumerable<TransitionData> results, double threshold, Dictionary<string, CompoundThresholdData> compoundThresholds = null)
         {
             if (compoundThresholds == null)
             {
@@ -158,7 +158,7 @@ namespace SrmHeavyQC
         /// Get the heavy transitions from the transition data
         /// </summary>
         /// <returns></returns>
-        public List<SrmTableData> GetHeavyTransitions()
+        public List<TransitionData> GetHeavyTransitions()
         {
             // TODO: Check for heavy transitions using precursor mass difference 0.5 <= m/z <= 6.0
             return GetAllTransitions().Where(x => x.IsHeavy).ToList();
@@ -168,9 +168,9 @@ namespace SrmHeavyQC
         /// Read all of the transition data from the instrument method data
         /// </summary>
         /// <returns></returns>
-        public List<SrmTableData> GetAllTransitions()
+        public List<TransitionData> GetAllTransitions()
         {
-            var srmTransitions = new List<SrmTableData>();
+            var srmTransitions = new List<TransitionData>();
             using (var rawReader = rawReaderThreader.CreateThreadAccessor())
             {
                 //Console.WriteLine($"File \"{RawFilePath}\": {rawReader.InstrumentMethodsCount} instrument methods");

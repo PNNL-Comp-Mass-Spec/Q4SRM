@@ -22,11 +22,11 @@ namespace SrmHeavyQC
 
         public bool UsesCompoundName { get; private set; }
 
-        public List<SrmTableData> ParseSrmTable()
+        public List<TransitionData> ParseSrmTable()
         {
             var bytes = Encoding.ASCII.GetBytes(SrmTable);
             var memStream = new MemoryStream(bytes);
-            return SrmTableData.ParseSrmTable(memStream).ToList();
+            return TransitionData.ParseSrmTable(memStream).ToList();
         }
 
         private void ProcessMethod(string method)

@@ -22,17 +22,17 @@ namespace SrmHeavyQC
             get { return TotalArea >= Threshold; }
         }
 
-        public List<SrmTableData> TransitionResults { get; }
+        public List<TransitionData> TransitionResults { get; }
         public List<TransitionSummaryData> TransitionSummaries { get; }
 
-        public SrmCombinedResult(SrmTableData data)
+        public SrmCombinedResult(TransitionData data)
         {
             CompoundName = data.CompoundName;
             PrecursorMz = data.PrecursorMz;
             StartTimeMinutes = data.StartTimeMinutes;
             StopTimeMinutes = data.StopTimeMinutes;
             TotalArea = 0;
-            TransitionResults = new List<SrmTableData>();
+            TransitionResults = new List<TransitionData>();
             TransitionSummaries = new List<TransitionSummaryData>();
         }
 
@@ -47,7 +47,7 @@ namespace SrmHeavyQC
         //    }
         //}
 
-        public void AddTransition(SrmTableData result)
+        public void AddTransition(TransitionData result)
         {
             if (result == null)
             {
