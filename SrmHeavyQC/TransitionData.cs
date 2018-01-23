@@ -53,7 +53,7 @@ namespace SrmHeavyQC
         {
             using (var csv = new CsvReader(new StreamReader(stream)))
             {
-                csv.Configuration.RegisterClassMap(new SrmTableDataMap());
+                csv.Configuration.RegisterClassMap(new MethodParsingMap());
                 csv.Configuration.Delimiter = "\t";
                 csv.Configuration.PrepareHeaderForMatch = header => header?.ToLower().Trim();
                 csv.Configuration.MissingFieldFound = null; // Allow missing fields
@@ -68,9 +68,9 @@ namespace SrmHeavyQC
             }
         }
 
-        public sealed class SrmTableDataMap : ClassMap<TransitionData>
+        public sealed class MethodParsingMap : ClassMap<TransitionData>
         {
-            public SrmTableDataMap()
+            public MethodParsingMap()
             {
                 //TSQ Vantage: Parent	Product	CE	Start	Stop	Pol	Trigger	Reference	Name
                 //TSQ Altis:   Compound Name	Start Time (min)	End Time (min)	Polarity	Precursor (m/z)	Product (m/z)	Collision Energy (V)
