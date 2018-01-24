@@ -45,8 +45,12 @@ namespace SrmHeavyQCTests
                 //reader.OutputResultsToConsole(results);
                 var comb = reader.AggregateResults(results, 20);
                 //reader.OutputResultsToConsole(comb);
+                var settings = new SettingsData()
+                {
+                    DefaultThreshold = 10000
+                };
 
-                SrmCombinedResult.WriteCombinedResultsToFile(resultPath, comb);
+                SrmCombinedResult.WriteCombinedResultsToFile(resultPath, comb, settings);
             }
         }
 

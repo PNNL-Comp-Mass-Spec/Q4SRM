@@ -34,8 +34,10 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MiscTests.cs" />
     <Compile Include="ReadingTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingsData.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="NUnit">

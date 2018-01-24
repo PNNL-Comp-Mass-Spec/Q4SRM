@@ -14,6 +14,7 @@ namespace SrmHeavyChecker
         private int maxThreads;
         private bool useOutputFolder;
         private bool useCompoundThresholdsFile;
+        private bool overwriteOutput;
 
         public string RawFilePath
         {
@@ -57,8 +58,16 @@ namespace SrmHeavyChecker
             set { this.RaiseAndSetIfChanged(ref useCompoundThresholdsFile, value); }
         }
 
+        public bool OverwriteOutput
+        {
+            get { return overwriteOutput; }
+            set { this.RaiseAndSetIfChanged(ref overwriteOutput, value); }
+        }
+
         public List<string> FilesToProcessList { get; } = new List<string>();
         public int MaxThreadsUsable { get; }
+
+        public string CompoundThresholdFileSha1Hash { get; set; }
 
         public IList<string> FilesToProcess => FilesToProcessList;
 

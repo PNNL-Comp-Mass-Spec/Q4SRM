@@ -60,6 +60,25 @@ namespace SrmHeavyChecker
 
         private void ProcessFile(IOptions options, string rawFilePath)
         {
+            var outputFileName = Path.GetFileNameWithoutExtension(rawFilePath) + "_heavyPeaks.tsv";
+            var outputFolder = Path.GetDirectoryName(rawFilePath);
+            if (!string.IsNullOrWhiteSpace(options.OutputFolder))
+            {
+                outputFolder = options.OutputFolder;
+            }
+            else if (string.IsNullOrWhiteSpace(outputFolder))
+            {
+                outputFolder = ".";
+            }
+
+            var outputFilePath = Path.Combine(outputFolder, outputFileName);
+
+            if (!options.OverwriteOutput && File.Exists(outputFilePath) && SrmCombinedResult.CheckSettings(outputFilePath, options))
+            {
+                Console.WriteLine("Skipping file \"{0}\"; existing output was created with matching settings", rawFilePath);
+                return;
+            }
+
             Console.WriteLine("Processing file \"{0}\"", rawFilePath);
             using (var rawReader = new XCalDataReader(rawFilePath))
             {
@@ -72,20 +91,7 @@ namespace SrmHeavyChecker
                 var combined = rawReader.AggregateResults(results, options.DefaultThreshold, CompoundThresholdsLookup);
                 //Console.WriteLine("File \"{0}\": CombinedResults: {1}", rawFilePath, combined.Count);
 
-                var outputFileName = Path.GetFileNameWithoutExtension(rawFilePath) + "_heavyPeaks.tsv";
-                var outputFolder = Path.GetDirectoryName(rawFilePath);
-                if (!string.IsNullOrWhiteSpace(options.OutputFolder))
-                {
-                    outputFolder = options.OutputFolder;
-                }
-                else if (string.IsNullOrWhiteSpace(outputFolder))
-                {
-                    outputFolder = ".";
-                }
-
-                var outputFilePath = Path.Combine(outputFolder, outputFileName);
-
-                SrmCombinedResult.WriteCombinedResultsToFile(outputFilePath, combined);
+                SrmCombinedResult.WriteCombinedResultsToFile(outputFilePath, combined, options);
             }
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
         }

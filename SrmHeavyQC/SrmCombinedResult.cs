@@ -42,15 +42,14 @@ namespace SrmHeavyQC
             Transitions = new List<TransitionData>();
         }
 
-        //public SrmCombinedResult()
-        //{
-        //    TotalArea = 0;
-        //    Transitions = new List<TransitionData>();
-        //    for (var i = 0; i < 50; i++)
-        //    {
-        //        Transitions.Add(new TransitionData());
-        //    }
-        //}
+        public SrmCombinedResult()
+        {
+            Transitions = new List<TransitionData>();
+            for (var i = 0; i < 10; i++)
+            {
+                Transitions.Add(new TransitionData());
+            }
+        }
 
         public void AddTransition(TransitionData result)
         {
@@ -128,7 +127,30 @@ namespace SrmHeavyQC
         public TransitionData Transition09 => Transitions.Count >= 9 ? Transitions[8] : new TransitionData();
         public TransitionData Transition10 => Transitions.Count >= 10 ? Transitions[9] : new TransitionData();
 
-        public static void WriteCombinedResultsToFile(string filepath, List<SrmCombinedResult> results)
+        public static bool CheckSettings(string filepath, ISettingsData currentSettings)
+        {
+            if (string.IsNullOrWhiteSpace(filepath) || !File.Exists(filepath))
+            {
+                return false;
+            }
+
+            var fileSettings = new SettingsData();
+
+            using (var streamReader = new StreamReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+            {
+                var line = streamReader.ReadLine();
+                if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("#"))
+                {
+                    return false;
+                }
+
+                fileSettings.PopulateFromTsvComment(line);
+            }
+
+            return currentSettings.SettingsEquals(fileSettings);
+        }
+
+        public static void WriteCombinedResultsToFile(string filepath, List<SrmCombinedResult> results, ISettingsData settings)
         {
             using (var csv = new CsvWriter(new StreamWriter(new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))))
             {
@@ -138,7 +160,33 @@ namespace SrmHeavyQC
                 csv.Configuration.Comment = '#';
                 csv.Configuration.AllowComments = true;
 
+                // Write the settings comment
+                csv.WriteComment(" Settings: " + settings.ConvertToTsvComment());
+                // Make sure to finish the line
+                csv.NextRecord();
+                // Write everything else, including the headers.
                 csv.WriteRecords(results);
+            }
+        }
+
+        public static IEnumerable<SrmCombinedResult> ReadCombinedResultsFile(string filepath)
+        {
+            using (var csv = new CsvReader(new StreamReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))))
+            {
+                // TODO: read the comment, and parse it into a settings object?
+                // TODO: Could read the header, and determine the appropriate map size to use.
+                csv.Configuration.RegisterClassMap(new SrmCombinedResultMap(10));
+                csv.Configuration.Delimiter = "\t";
+                csv.Configuration.PrepareHeaderForMatch = header => header?.ToLower().Trim();
+                csv.Configuration.MissingFieldFound = null; // Allow missing fields
+                csv.Configuration.HeaderValidated = null; // Allow missing header items
+                csv.Configuration.Comment = '#';
+                csv.Configuration.AllowComments = true;
+
+                foreach (var result in csv.GetRecords<SrmCombinedResult>())
+                {
+                    yield return result;
+                }
             }
         }
 

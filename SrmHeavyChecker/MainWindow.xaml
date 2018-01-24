@@ -61,6 +61,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -81,6 +82,7 @@
                 <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap"
                            Text="Requires a tab-separated file with the columns 'Compound Name' (req), 'Threshold' (req), and 'Precursor (m/z)' (opt). These override the minimum peak area for matching compounds."
                            Visibility="{Binding Options.UseCompoundThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" VerticalAlignment="Center" Content="Overwrite existing results (even if run with the same settings)" IsChecked="{Binding Options.OverwriteOutput}" />
             </Grid>
         </Grid>
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" TextWrapping="Wrap" Text="{Binding ValidationError}" />

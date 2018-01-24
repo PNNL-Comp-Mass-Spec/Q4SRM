@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
+using SrmHeavyQC;
 
 namespace SrmHeavyChecker
 {
-    public interface IOptions
+    public interface IOptions : ISettingsData
     {
-        string RawFilePath { get; set; }
+        string RawFilePath { get; }
 
-        double DefaultThreshold { get; set; }
+        string OutputFolder { get; }
 
-        string CompoundThresholdFilePath { get; set; }
-
-        string OutputFolder { get; set; }
-
-        int MaxThreads { get; set; }
+        int MaxThreads { get; }
 
         IList<string> FilesToProcess { get; }
+
+        bool OverwriteOutput { get; }
     }
 }

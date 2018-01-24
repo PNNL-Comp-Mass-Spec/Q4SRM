@@ -29,6 +29,11 @@ namespace SrmHeavyChecker
         [Option("threads", Required = false, HelpText = "Maximum number of threads to use (files processed simultaneously), '0' for automatic", Min = 0)]
         public int MaxThreads { get; set; }
 
+        [Option("ow", "overwrite", Required = false, HelpText = "If specified, all files will be processed, even if existing output was created with the same settings.")]
+        public bool OverwriteOutput { get; set; }
+
+        public string CompoundThresholdFileSha1Hash { get; set; }
+
         public List<string> FilesToProcessList { get; }
         public IList<string> FilesToProcess => FilesToProcessList;
 
@@ -41,6 +46,7 @@ namespace SrmHeavyChecker
             Recurse = false;
             FileFilter = "*.raw";
             MaxThreads = 0;
+            OverwriteOutput = false;
         }
 
         public bool Validate()
