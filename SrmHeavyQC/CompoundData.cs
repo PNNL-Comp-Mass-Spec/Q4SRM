@@ -6,12 +6,15 @@ using CsvHelper.Configuration;
 
 namespace SrmHeavyQC
 {
-    public class SrmCombinedResult
+    public class CompoundData
     {
-        public string CompoundName { get; }
-        public double PrecursorMz { get; }
-        public double StartTimeMinutes { get; }
-        public double StopTimeMinutes { get; }
+        public string CompoundName { get; private set; }
+        public double PrecursorMz { get; private set; }
+        public double StartTimeMinutes { get; private set; }
+        public double StopTimeMinutes { get; private set; }
+        public string Polarity { get; }
+        public double CollisionVolts { get; }
+        public List<TransitionData> Transitions { get; }
 
         public double TotalIntensitySum { get; private set; }
         public double MaxIntensity { get; private set; }
@@ -27,49 +30,37 @@ namespace SrmHeavyQC
 
         public bool PassesThreshold { get; private set; }
 
-        public List<TransitionData> Transitions { get; }
+        private readonly bool isPopulatedFromResultsFile = false;
 
-        public SrmCombinedResult(TransitionData data)
+        public CompoundData(TransitionData transition)
         {
-            CompoundName = data.CompoundName;
-            PrecursorMz = data.PrecursorMz;
-            StartTimeMinutes = data.StartTimeMinutes;
-            StopTimeMinutes = data.StopTimeMinutes;
-            TotalIntensitySum = 0;
-            Transitions = new List<TransitionData>();
+            CompoundName = transition.CompoundName;
+            PrecursorMz = transition.PrecursorMz;
+            StartTimeMinutes = transition.StartTimeMinutes;
+            StopTimeMinutes = transition.StopTimeMinutes;
+            Polarity = transition.Polarity;
+            CollisionVolts = transition.CollisionVolts;
+            Transitions = new List<TransitionData>(10);
         }
 
-        public SrmCombinedResult()
+        public CompoundData()
         {
-            Transitions = new List<TransitionData>();
+            Transitions = new List<TransitionData>(10);
             for (var i = 0; i < 10; i++)
             {
                 Transitions.Add(new TransitionData());
             }
+
+            isPopulatedFromResultsFile = true;
         }
 
-        public void AddTransition(TransitionData result)
+        public void CalculateSummaryData()
         {
-            if (result == null)
+            if (isPopulatedFromResultsFile)
             {
                 return;
             }
 
-            if (Transitions.Count >= 10)
-            {
-                System.Console.WriteLine(@"Warning: Will not output additional transition for compound ""{0}"": it already has 10 transitions.", CompoundName);
-            }
-
-            if (!Transitions.Contains(result))
-            {
-                Transitions.Add(result);
-            }
-
-            CalculateSummaryData();
-        }
-
-        private void CalculateSummaryData()
-        {
             TotalIntensitySum = Transitions.Sum(x => x.IntensitySum);
 
             if (TotalIntensitySum.Equals(0))
@@ -115,6 +106,18 @@ namespace SrmHeavyQC
             }
         }
 
+        private void RemoveEmptyTransitions()
+        {
+            // Force ToList() to allow modification of original collection
+            foreach (var transition in Transitions.ToList())
+            {
+                if (transition.PrecursorMz < 0.5)
+                {
+                    Transitions.Remove(transition);
+                }
+            }
+        }
+
         public TransitionData Transition01 => Transitions.Count >= 1 ? Transitions[0] : new TransitionData();
         public TransitionData Transition02 => Transitions.Count >= 2 ? Transitions[1] : new TransitionData();
         public TransitionData Transition03 => Transitions.Count >= 3 ? Transitions[2] : new TransitionData();
@@ -149,12 +152,22 @@ namespace SrmHeavyQC
             return currentSettings.SettingsEquals(fileSettings);
         }
 
-        public static void WriteCombinedResultsToFile(string filepath, List<SrmCombinedResult> results, ISettingsData settings)
+        public static void WriteCombinedResultsToFile(string filepath, List<CompoundData> results, ISettingsData settings)
         {
+            foreach (var compound in results)
+            {
+                if (compound.Transitions.Count >= 10)
+                {
+                    System.Console.WriteLine(@"Warning: Will not output additional transition for compound ""{0}"": it already has 10 transitions.", compound.CompoundName);
+                }
+
+                compound.CalculateSummaryData();
+            }
+            var maxTrans = results.Max(x => x.Transitions.Count);
+
             using (var csv = new CsvWriter(new StreamWriter(new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))))
             {
-                var maxTrans = results.Max(x => x.Transitions.Count);
-                csv.Configuration.RegisterClassMap(new SrmCombinedResultMap(maxTrans));
+                csv.Configuration.RegisterClassMap(new CompoundResultMap(maxTrans));
                 csv.Configuration.Delimiter = "\t";
                 csv.Configuration.Comment = '#';
                 csv.Configuration.AllowComments = true;
@@ -168,13 +181,13 @@ namespace SrmHeavyQC
             }
         }
 
-        public static IEnumerable<SrmCombinedResult> ReadCombinedResultsFile(string filepath)
+        public static IEnumerable<CompoundData> ReadCombinedResultsFile(string filepath)
         {
             using (var csv = new CsvReader(new StreamReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))))
             {
                 // TODO: read the comment, and parse it into a settings object?
                 // TODO: Could read the header, and determine the appropriate map size to use.
-                csv.Configuration.RegisterClassMap(new SrmCombinedResultMap(10));
+                csv.Configuration.RegisterClassMap(new CompoundResultMap(10));
                 csv.Configuration.Delimiter = "\t";
                 csv.Configuration.PrepareHeaderForMatch = header => header?.ToLower().Trim();
                 csv.Configuration.MissingFieldFound = null; // Allow missing fields
@@ -183,20 +196,21 @@ namespace SrmHeavyQC
                 csv.Configuration.AllowComments = true;
                 csv.Configuration.IncludePrivateMembers = true;
 
-                foreach (var result in csv.GetRecords<SrmCombinedResult>())
+                foreach (var result in csv.GetRecords<CompoundData>())
                 {
+                    result.RemoveEmptyTransitions();
                     yield return result;
                 }
             }
         }
 
-        public class SrmCombinedResultMap : ClassMap<SrmCombinedResult>
+        public class CompoundResultMap : ClassMap<CompoundData>
         {
-            public SrmCombinedResultMap() : this(5)
+            public CompoundResultMap() : this(5)
             {
             }
 
-            public SrmCombinedResultMap(int maxTransitionCount)
+            public CompoundResultMap(int maxTransitionCount)
             {
                 var index = 0;
                 Map(x => x.CompoundName).Name("Compound Name").Index(index++);

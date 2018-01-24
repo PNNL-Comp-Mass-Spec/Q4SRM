@@ -57,12 +57,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompoundThresholdData.cs" />
-    <Compile Include="CompoundTransitions.cs" />
+    <Compile Include="CompoundData.cs" />
     <Compile Include="DecimalLimitingDoubleTypeConverter.cs" />
     <Compile Include="ISettingsDataExtensions.cs" />
     <Compile Include="ISettingsData.cs" />
     <Compile Include="SettingsData.cs" />
-    <Compile Include="SrmCombinedResult.cs" />
     <Compile Include="TransitionData.cs" />
     <Compile Include="XCalDataReader.cs" />
     <Compile Include="XCalInstMethod.cs" />

@@ -37,20 +37,18 @@ namespace SrmHeavyQCTests
         {
             using (var reader = new XCalDataReader(rawPath))
             {
-                var results = reader.ReadRawData();
-                if (results == null)
-                {
-                    return;
-                }
-                //reader.OutputResultsToConsole(results);
-                var comb = reader.AggregateResults(results, 20);
-                //reader.OutputResultsToConsole(comb);
                 var settings = new SettingsData()
                 {
                     DefaultThreshold = 10000
                 };
 
-                SrmCombinedResult.WriteCombinedResultsToFile(resultPath, comb, settings);
+                var results = reader.ReadRawData(settings);
+                if (results == null)
+                {
+                    return;
+                }
+
+                CompoundData.WriteCombinedResultsToFile(resultPath, results, settings);
             }
         }
 

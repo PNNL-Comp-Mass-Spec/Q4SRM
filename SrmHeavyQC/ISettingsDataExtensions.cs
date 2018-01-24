@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -37,6 +38,17 @@ namespace SrmHeavyQC
             }
 
             return formatted;
+        }
+
+        public static Dictionary<string, CompoundThresholdData> LoadCompoundThresholds(this ISettingsData settings)
+        {
+            if (string.IsNullOrWhiteSpace(settings.CompoundThresholdFilePath) || !File.Exists(settings.CompoundThresholdFilePath))
+            {
+                return null;
+            }
+
+            var thresholds = CompoundThresholdData.ReadFromFile(settings.CompoundThresholdFilePath).ToList();
+            return CompoundThresholdData.ConvertToSearchMap(thresholds);
         }
 
         private static Regex TsvCommentSettingsRegex = new Regex(@"DefaultThreshold: (?<defaultThreshold>\d+\.?\d*)(; CompoundThresholdsFile: (?<filepath>.*); SHA1Hash (?<fileHash>.*))?", RegexOptions.Compiled | RegexOptions.IgnoreCase);

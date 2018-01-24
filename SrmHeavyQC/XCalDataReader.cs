@@ -22,7 +22,7 @@ namespace SrmHeavyQC
             rawReaderThreader = RawFileReaderFactory.CreateThreadManager(rawFilePath);
         }
 
-        public List<TransitionData> ReadRawData()
+        public List<CompoundData> ReadRawData(ISettingsData settings)
         {
             var srmTransitions = GetHeavyTransitions().ToList();
             //Console.WriteLine($"File \"{RawFilePath}\": {srmTransitions.Count} heavy transitions in instrument method.");
@@ -36,7 +36,7 @@ namespace SrmHeavyQC
             //srmTransitions = temp;
             // TODO: Could determine heavy peptides by checking names vs. precursor m/z?
             var scanTimes = new Dictionary<int, double>();
-            var combSrmTransitions = JoinTransitions(srmTransitions);
+            var combSrmTransitions = JoinTransitions(srmTransitions, settings);
             using (var rawReader = rawReaderThreader.CreateThreadAccessor())
             {
                 if (!rawReader.SelectMsData())
@@ -57,7 +57,7 @@ namespace SrmHeavyQC
                 }
 
                 // Map transition start/stop times to scans
-                var scansAndTargets = new Dictionary<int, List<CompoundTransitions>>();
+                var scansAndTargets = new Dictionary<int, List<CompoundData>>();
                 foreach (var scan in scanTimes)
                 {
                     var matches = combSrmTransitions.Values
@@ -114,50 +114,33 @@ namespace SrmHeavyQC
                 }
             }
 
-            return srmTransitions;
+            return combSrmTransitions.Values.ToList();
         }
 
-        private Dictionary<string, CompoundTransitions> JoinTransitions(List<TransitionData> data)
+        private Dictionary<string, CompoundData> JoinTransitions(List<TransitionData> data, ISettingsData settings)
         {
-            var combined = new Dictionary<string, CompoundTransitions>();
+            var compoundThresholds = settings.LoadCompoundThresholds();
+            if (compoundThresholds == null)
+            {
+                compoundThresholds = new Dictionary<string, CompoundThresholdData>();
+            }
+            var combined = new Dictionary<string, CompoundData>();
             foreach (var item in data)
             {
                 if (!combined.TryGetValue(item.CompoundName, out var group))
                 {
-                    group = new CompoundTransitions(item);
+                    group = new CompoundData(item) { Threshold = settings.DefaultThreshold };
+                    // Look for and handle custom thresholds
+                    if (compoundThresholds.TryGetValue(item.CompoundName, out var cThreshold))
+                    {
+                        group.Threshold = cThreshold.Threshold;
+                    }
                     combined.Add(group.CompoundName, group);
                 }
                 group.Transitions.Add(item);
             }
 
             return combined;
-        }
-
-        public List<SrmCombinedResult> AggregateResults(IEnumerable<TransitionData> results, double threshold, Dictionary<string, CompoundThresholdData> compoundThresholds = null)
-        {
-            if (compoundThresholds == null)
-            {
-                compoundThresholds = new Dictionary<string, CompoundThresholdData>();
-            }
-            var combinedMap = new Dictionary<string, SrmCombinedResult>();
-            foreach (var result in results)
-            {
-                SrmCombinedResult group;
-                if (!combinedMap.TryGetValue(result.CompoundName, out group))
-                {
-                    group = new SrmCombinedResult(result) {Threshold = threshold};
-                    // Look for and handle custom thresholds
-                    if (compoundThresholds.TryGetValue(result.CompoundName, out var cThreshold))
-                    {
-                        group.Threshold = cThreshold.Threshold;
-                    }
-                    combinedMap.Add(result.CompoundName, group);
-                }
-
-                group.AddTransition(result);
-            }
-
-            return combinedMap.Values.ToList();
         }
 
         /// <summary>

@@ -47,7 +47,7 @@ namespace SrmHeavyQCTests
         public void TestReadResults()
         {
             var file = @"F:\SRM_data\Rush2_p14RR_62_26Oct17_Smeagol-WRUSHCol3_75x20a_heavyPeaks.tsv";
-            var results = SrmCombinedResult.ReadCombinedResultsFile(file).ToList();
+            var results = CompoundData.ReadCombinedResultsFile(file).ToList();
             Console.WriteLine(results.Count);
         }
     }
