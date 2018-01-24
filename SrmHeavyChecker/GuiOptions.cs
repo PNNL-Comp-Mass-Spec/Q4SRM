@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reactive.Concurrency;
 using PRISM;
 using ReactiveUI;
 
@@ -7,6 +9,7 @@ namespace SrmHeavyChecker
 {
     public class GuiOptions : ReactiveObject, IOptions
     {
+        public const string SummaryStatsFileDefaultName = "HeavySummary.tsv";
         private string rawFilePath;
         private double defaultThreshold;
         private string compoundThresholdFilePath;
@@ -18,6 +21,7 @@ namespace SrmHeavyChecker
         private bool createThresholdsFile;
         private double createdThresholdsFileThresholdLevel;
         private string compoundThresholdOutputFilePath;
+        private string summaryStatsFilePath;
 
         public string RawFilePath
         {
@@ -40,7 +44,15 @@ namespace SrmHeavyChecker
         public string OutputFolder
         {
             get { return outputFolder; }
-            set { this.RaiseAndSetIfChanged(ref outputFolder, value); }
+            set
+            {
+                var oldValue = outputFolder;
+                this.RaiseAndSetIfChanged(ref outputFolder, value);
+                RxApp.MainThreadScheduler.Schedule(() =>
+                {
+                    UpdateSummaryStatsFilePath(oldValue, value);
+                });
+            }
         }
 
         public int MaxThreads
@@ -85,6 +97,12 @@ namespace SrmHeavyChecker
             set { this.RaiseAndSetIfChanged(ref compoundThresholdOutputFilePath, value); }
         }
 
+        public string SummaryStatsFilePath
+        {
+            get { return summaryStatsFilePath; }
+            set { this.RaiseAndSetIfChanged(ref summaryStatsFilePath, value); }
+        }
+
         public List<string> FilesToProcessList { get; } = new List<string>();
         public int MaxThreadsUsable { get; }
 
@@ -96,13 +114,62 @@ namespace SrmHeavyChecker
         {
             RawFilePath = "";
             CompoundThresholdFilePath = "";
-            DefaultThreshold = 20;
+            DefaultThreshold = 10000;
             MaxThreads = SystemInfo.GetCoreCount();
             UseOutputFolder = false;
             UseCompoundThresholdsFile = false;
             MaxThreadsUsable = SystemInfo.GetLogicalCoreCount();
             CreateThresholdsFile = false;
             CreatedThresholdsFileThresholdLevel = 0.50;
+            SummaryStatsFilePath = SummaryStatsFileDefaultName;
+        }
+
+        /// <summary>
+        /// Updates the output folder path if the user hasn't changed it directly
+        /// </summary>
+        /// <param name="oldPath"></param>
+        /// <param name="newPath"></param>
+        public void UpdateOutputFolder(string oldPath, string newPath)
+        {
+            if (string.IsNullOrWhiteSpace(OutputFolder))
+            {
+                OutputFolder = newPath;
+            }
+
+            if (oldPath != null && oldPath.Equals(OutputFolder, StringComparison.OrdinalIgnoreCase))
+            {
+                OutputFolder = newPath;
+            }
+        }
+
+        /// <summary>
+        /// Updates the summary stats file path, replacing <paramref name="oldOutputPath"/> with <paramref name="newOutputPath"/>
+        /// </summary>
+        /// <param name="oldOutputPath"></param>
+        /// <param name="newOutputPath"></param>
+        public void UpdateSummaryStatsFilePath(string oldOutputPath, string newOutputPath)
+        {
+            if (SummaryStatsFilePath.Equals(SummaryStatsFileDefaultName))
+            {
+                SummaryStatsFilePath = Path.Combine(newOutputPath, SummaryStatsFileDefaultName);
+            }
+            if (oldOutputPath != null && oldOutputPath.Equals(newOutputPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var currentDir = Path.GetDirectoryName(SummaryStatsFilePath);
+            var currentName = Path.GetFileName(SummaryStatsFilePath);
+            if (string.IsNullOrWhiteSpace(currentDir))
+            {
+                SummaryStatsFilePath = Path.Combine(newOutputPath, SummaryStatsFilePath);
+                return;
+            }
+
+            if (currentDir.Equals(oldOutputPath, StringComparison.OrdinalIgnoreCase))
+            {
+                SummaryStatsFilePath = Path.Combine(newOutputPath, currentName);
+            }
         }
 
         public string Validate()
@@ -137,6 +204,7 @@ namespace SrmHeavyChecker
                     return $"ERROR: Thresholds output file folder does not exist!: \"{directory}\"";
                 }
             }
+
 
             return null;
         }

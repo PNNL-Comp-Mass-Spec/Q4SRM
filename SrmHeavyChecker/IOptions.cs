@@ -20,5 +20,7 @@ namespace SrmHeavyChecker
         double CreatedThresholdsFileThresholdLevel { get; }
 
         string CompoundThresholdOutputFilePath { get; }
+
+        string SummaryStatsFilePath { get; }
     }
 }

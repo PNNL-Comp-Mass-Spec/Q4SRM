@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +31,16 @@ namespace SrmHeavyChecker
         public string WorkFolder
         {
             get { return workFolder; }
-            set { this.RaiseAndSetIfChanged(ref workFolder, value); }
+            set
+            {
+                var oldValue = workFolder;
+                this.RaiseAndSetIfChanged(ref workFolder, value);
+                RxApp.MainThreadScheduler.Schedule(() =>
+                {
+                    Options.UpdateOutputFolder(oldValue, value);
+                    Options.UpdateSummaryStatsFilePath(oldValue, value);
+                });
+            }
         }
 
         public bool WorkFolderRecurse
@@ -79,6 +89,7 @@ namespace SrmHeavyChecker
         public ReactiveCommand<Unit, Unit> MoveToQueueCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> RemoveFromQueueCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> BrowseForOutputFolderCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> BrowseForStatsFileCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> BrowseForThresholdsFileCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> BrowseForThresholdsOutputFileCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ProcessDatasetsCommand { get; private set; }
@@ -94,6 +105,7 @@ namespace SrmHeavyChecker
             MoveToQueueCommand = ReactiveCommand.Create(() => MoveToProcessingList(), this.WhenAnyValue(x => x.AvailableDatasetsViewModel.SelectedData.Count).Select(x => x > 0));
             RemoveFromQueueCommand = ReactiveCommand.Create(() => RemoveFromProcessingList(), this.WhenAnyValue(x => x.DatasetsToProcessViewModel.SelectedData.Count).Select(x => x > 0));
             BrowseForOutputFolderCommand = ReactiveCommand.Create(() => BrowseForOutputFolder());
+            BrowseForStatsFileCommand = ReactiveCommand.Create(() => BrowseForStatsFile());
             BrowseForThresholdsFileCommand = ReactiveCommand.Create(() => BrowseForThresholdFile());
             BrowseForThresholdsOutputFileCommand = ReactiveCommand.Create(() => BrowseForThresholdOutputFilePath());
             ProcessDatasetsCommand = ReactiveCommand.CreateFromTask(() => ProcessDatasets(), this.WhenAnyValue(x => x.AvailableDatasetsViewModel.Data.Count, x => x.DatasetsToProcessViewModel.Data.Count).Select(x => x.Item1 > 0 || x.Item2 > 0));
@@ -176,6 +188,23 @@ namespace SrmHeavyChecker
 
                 Options.OutputFolder = folder;
                 Options.UseOutputFolder = true;
+            }
+        }
+
+        private void BrowseForStatsFile()
+        {
+            var dialog = new CommonOpenFileDialog
+            {
+                DefaultFileName = GuiOptions.SummaryStatsFileDefaultName,
+                Filters = { new CommonFileDialogFilter("Tab-separated text", "*.tsv;*.txt") },
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                var filePath = dialog.FileName;
+
+                Options.SummaryStatsFilePath = filePath;
             }
         }
 

@@ -84,19 +84,8 @@ namespace SrmHeavyQC
             {
                 fullIntensityList.AddRange(result.Intensities);
             }
-            fullIntensityList.Sort();
-            if (fullIntensityList.Count % 2 == 0)
-            {
-                // even number of items, must average the middle 2
-                var int1 = fullIntensityList[fullIntensityList.Count / 2];
-                var int2 = fullIntensityList[fullIntensityList.Count / 2 + 1];
-                MedianIntensity = (int1 + int2) / 2.0;
-            }
-            else
-            {
-                // odd number of items, integer division will give us the center index
-                MedianIntensity = fullIntensityList[fullIntensityList.Count / 2];
-            }
+
+            MedianIntensity = fullIntensityList.Median();
 
             IntensityRatioMaxVsMedian = MaxIntensity / MedianIntensity;
             if (double.IsInfinity(IntensityRatioMaxVsMedian) || IntensityRatioMaxVsMedian > MaxIntensity)

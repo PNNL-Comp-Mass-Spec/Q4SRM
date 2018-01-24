@@ -7,6 +7,8 @@ namespace SrmHeavyChecker
 {
     public class CmdLineOptions : IOptions
     {
+        private const string SummaryStatsFileDefaultName = "HeavySummary.tsv";
+
         [Option("raw", Required = true, HelpShowsDefault = false, HelpText = "Path to .raw file, or directory containing .raw files")]
         public string RawFilePath { get; set; }
 
@@ -42,6 +44,9 @@ namespace SrmHeavyChecker
 
         public string CompoundThresholdFileSha1Hash { get; set; }
 
+        [Option("summaryPath", Required = false, HelpText = "Path where processing summary tsv should be written. Default is [out folder/raw file folder]\\HeavySummary.tsv", HelpShowsDefault = false)]
+        public string SummaryStatsFilePath { get; set; }
+
         public List<string> FilesToProcessList { get; }
         public IList<string> FilesToProcess => FilesToProcessList;
 
@@ -49,7 +54,7 @@ namespace SrmHeavyChecker
         {
             RawFilePath = "";
             CompoundThresholdFilePath = "";
-            DefaultThreshold = 20;
+            DefaultThreshold = 10000;
             FilesToProcessList = new List<string>();
             Recurse = false;
             FileFilter = "*.raw";
@@ -119,6 +124,47 @@ namespace SrmHeavyChecker
                 {
                     Console.WriteLine("ERROR: Thresholds output file folder does not exist!: \"{0}\"", directory);
                     return false;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(SummaryStatsFilePath))
+            {
+                if (!File.Exists(SummaryStatsFilePath))
+                {
+                    var directory = Path.GetDirectoryName(SummaryStatsFilePath);
+                    if (string.IsNullOrWhiteSpace(directory))
+                    {
+                        directory = ".";
+                    }
+
+                    if (!Directory.Exists(directory))
+                    {
+                        Console.WriteLine("EEROR: Cannot write summary file to \"{0}\": Directory does not exist.", SummaryStatsFilePath);
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(OutputFolder))
+                {
+                    SummaryStatsFilePath = Path.Combine(OutputFolder, SummaryStatsFileDefaultName);
+                }
+                else if (Directory.Exists(RawFilePath))
+                {
+                    SummaryStatsFilePath = Path.Combine(RawFilePath, SummaryStatsFileDefaultName);
+                }
+                else
+                {
+                    var directory = Path.GetDirectoryName(RawFilePath);
+                    if (string.IsNullOrWhiteSpace(directory))
+                    {
+                        SummaryStatsFilePath = SummaryStatsFileDefaultName;
+                    }
+                    else
+                    {
+                        SummaryStatsFilePath = Path.Combine(directory, SummaryStatsFileDefaultName);
+                    }
                 }
             }
 

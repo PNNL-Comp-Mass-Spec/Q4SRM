@@ -34,10 +34,7 @@ namespace SrmHeavyChecker
                 Parallel.ForEach(options.FilesToProcess, parallelOptions, x => ProcessFile(options, x));
             }
 
-            if (options.CreateThresholdsFile)
-            {
-                CreateThresholdsFile(options);
-            }
+            CreateSummaryFile(options);
         }
 
         private string GetOutputFileForDataset(IOptions options, string rawFilePath)
@@ -83,19 +80,38 @@ namespace SrmHeavyChecker
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
         }
 
-        private void CreateThresholdsFile(IOptions options)
+        private void CreateSummaryFile(IOptions options)
         {
-            Console.WriteLine("Creating per-compound thresholds file...");
+            var summaryData = new List<SummaryStats>();
             var allResults = new List<CompoundData>();
             foreach (var dataset in options.FilesToProcess)
             {
                 var resultFilePath = GetOutputFileForDataset(options, dataset);
-                var results = CompoundData.ReadCombinedResultsFile(resultFilePath);
-                allResults.AddRange(results);
+                var results = CompoundData.ReadCombinedResultsFile(resultFilePath).ToList();
+                var datasetName = Path.GetFileName(dataset);
+
+                summaryData.Add(new SummaryStats(datasetName, results));
+
+                if (options.CreateThresholdsFile)
+                {
+                    allResults.AddRange(results);
+                }
             }
 
+            SummaryStats.WriteToFile(options.SummaryStatsFilePath, summaryData);
+
+            if (options.CreateThresholdsFile)
+            {
+                CreateThresholdsFile(options, allResults);
+            }
+        }
+
+        private void CreateThresholdsFile(IOptions options, List<CompoundData> fullResults)
+        {
+            Console.WriteLine("Creating per-compound thresholds file...");
+
             // Group the passing results
-            var grouped = allResults.Where(x => x.PassesThreshold).GroupBy(x => x.CompoundName);
+            var grouped = fullResults.Where(x => x.PassesThreshold).GroupBy(x => x.CompoundName);
             var thresholds = new List<CompoundThresholdData>();
             foreach (var group in grouped)
             {

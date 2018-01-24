@@ -59,6 +59,7 @@
     <Compile Include="CompoundThresholdData.cs" />
     <Compile Include="CompoundData.cs" />
     <Compile Include="DecimalLimitingDoubleTypeConverter.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ISettingsDataExtensions.cs" />
     <Compile Include="ISettingsData.cs" />
     <Compile Include="SettingsData.cs" />
