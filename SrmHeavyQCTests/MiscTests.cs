@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using SrmHeavyQC;
 
@@ -40,6 +41,14 @@ namespace SrmHeavyQCTests
             Assert.AreEqual(filePath, parsedSettings.CompoundThresholdFilePath);
             Assert.AreEqual(sha1, parsedSettings.CompoundThresholdFileSha1Hash);
             Assert.True(settings.SettingsEquals(parsedSettings));
+        }
+
+        [Test]
+        public void TestReadResults()
+        {
+            var file = @"F:\SRM_data\Rush2_p14RR_62_26Oct17_Smeagol-WRUSHCol3_75x20a_heavyPeaks.tsv";
+            var results = SrmCombinedResult.ReadCombinedResultsFile(file).ToList();
+            Console.WriteLine(results.Count);
         }
     }
 }

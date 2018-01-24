@@ -25,10 +25,7 @@ namespace SrmHeavyQC
 
         public double Threshold { get; set; }
 
-        public bool PassesThreshold
-        {
-            get { return TotalIntensitySum >= Threshold; }
-        }
+        public bool PassesThreshold { get; private set; }
 
         public List<TransitionData> Transitions { get; }
 
@@ -80,6 +77,8 @@ namespace SrmHeavyQC
                 // Avoid divide by zero
                 return;
             }
+
+            PassesThreshold = TotalIntensitySum >= Threshold;
 
             foreach (var transition in Transitions)
             {
@@ -182,6 +181,7 @@ namespace SrmHeavyQC
                 csv.Configuration.HeaderValidated = null; // Allow missing header items
                 csv.Configuration.Comment = '#';
                 csv.Configuration.AllowComments = true;
+                csv.Configuration.IncludePrivateMembers = true;
 
                 foreach (var result in csv.GetRecords<SrmCombinedResult>())
                 {
