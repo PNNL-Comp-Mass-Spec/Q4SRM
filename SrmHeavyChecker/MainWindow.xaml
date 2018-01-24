@@ -62,6 +62,9 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -71,7 +74,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Max Threads" />
                 <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Margin="3" Minimum="1" Maximum="{Binding Options.MaxThreadsUsable}" Value="{Binding Options.MaxThreads}" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum peak area to pass" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum summed intensity to pass" />
                 <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Margin="3" Minimum="1" Value="{Binding Options.DefaultThreshold}" />
                 <CheckBox Grid.Row="2" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Output Folder" IsChecked="{Binding Options.UseOutputFolder}" />
                 <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.OutputFolder}" />
@@ -83,6 +86,12 @@
                            Text="Requires a tab-separated file with the columns 'Compound Name' (req), 'Threshold' (req), and 'Precursor (m/z)' (opt). These override the minimum peak area for matching compounds."
                            Visibility="{Binding Options.UseCompoundThresholdsFile, Converter={StaticResource BoolToVis}}" />
                 <CheckBox Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" VerticalAlignment="Center" Content="Overwrite existing results (even if run with the same settings)" IsChecked="{Binding Options.OverwriteOutput}" />
+                <CheckBox Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" VerticalAlignment="Center" Content="Create a per-compound thresholds file for all compounds that pass the minimum threshold (averaged across processed files)" IsChecked="{Binding Options.CreateThresholdsFile}" />
+                <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Output Threshold level" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                <xctk:DoubleUpDown Grid.Row="7" Grid.Column="1" Margin="3" Minimum="0.01" Maximum="0.99" Value="{Binding Options.CreatedThresholdsFileThresholdLevel}" Increment="0.01" FormatString="P0" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Per-compound output file" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                <TextBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.CompoundThresholdOutputFilePath}" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                <Button Grid.Row="8" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsOutputFileCommand}" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
             </Grid>
         </Grid>
         <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" TextWrapping="Wrap" Text="{Binding ValidationError}" />

@@ -14,5 +14,11 @@ namespace SrmHeavyChecker
         IList<string> FilesToProcess { get; }
 
         bool OverwriteOutput { get; }
+
+        bool CreateThresholdsFile { get; }
+
+        double CreatedThresholdsFileThresholdLevel { get; }
+
+        string CompoundThresholdOutputFilePath { get; }
     }
 }

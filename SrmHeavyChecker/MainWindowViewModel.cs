@@ -80,6 +80,7 @@ namespace SrmHeavyChecker
         public ReactiveCommand<Unit, Unit> RemoveFromQueueCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> BrowseForOutputFolderCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> BrowseForThresholdsFileCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> BrowseForThresholdsOutputFileCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> ProcessDatasetsCommand { get; private set; }
         public ReactiveCommand<Unit, Unit> CancelCommand { get; private set; }
 
@@ -94,6 +95,7 @@ namespace SrmHeavyChecker
             RemoveFromQueueCommand = ReactiveCommand.Create(() => RemoveFromProcessingList(), this.WhenAnyValue(x => x.DatasetsToProcessViewModel.SelectedData.Count).Select(x => x > 0));
             BrowseForOutputFolderCommand = ReactiveCommand.Create(() => BrowseForOutputFolder());
             BrowseForThresholdsFileCommand = ReactiveCommand.Create(() => BrowseForThresholdFile());
+            BrowseForThresholdsOutputFileCommand = ReactiveCommand.Create(() => BrowseForThresholdOutputFilePath());
             ProcessDatasetsCommand = ReactiveCommand.CreateFromTask(() => ProcessDatasets(), this.WhenAnyValue(x => x.AvailableDatasetsViewModel.Data.Count, x => x.DatasetsToProcessViewModel.Data.Count).Select(x => x.Item1 > 0 || x.Item2 > 0));
             CancelCommand = ReactiveCommand.Create(() => CancelProcessing(), this.WhenAnyValue(x => x.IsNotRunning).Select(x => !x));
 
@@ -191,6 +193,22 @@ namespace SrmHeavyChecker
 
                 Options.CompoundThresholdFilePath = filePath;
                 Options.UseCompoundThresholdsFile = true;
+            }
+        }
+
+        private void BrowseForThresholdOutputFilePath()
+        {
+            var dialog = new CommonOpenFileDialog
+            {
+                Filters = { new CommonFileDialogFilter("Tab-separated text", "*.tsv;*.txt") },
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                var filePath = dialog.FileName;
+
+                Options.CompoundThresholdOutputFilePath = filePath;
             }
         }
 

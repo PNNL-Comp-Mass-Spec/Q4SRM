@@ -49,13 +49,27 @@ namespace SrmHeavyQC
             }
         }
 
+        public static void WriteToFile(string filePath, IEnumerable<CompoundThresholdData> thresholds)
+        {
+            using (var csv = new CsvWriter(new StreamWriter(new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))))
+            {
+                csv.Configuration.RegisterClassMap(new CompoundThresholdDataMap());
+                csv.Configuration.Delimiter = "\t";
+                csv.Configuration.Comment = '#';
+                csv.Configuration.AllowComments = true;
+
+                csv.WriteRecords(thresholds);
+            }
+        }
+
         public sealed class CompoundThresholdDataMap : ClassMap<CompoundThresholdData>
         {
             public CompoundThresholdDataMap()
             {
-                Map(x => x.PrecursorMz).Name("Precursor (m/z)", "Precursor", "Parent").TypeConverterOption.NumberStyles(NumberStyles.Float | NumberStyles.AllowThousands);
-                Map(x => x.Threshold).Name("Threshold").TypeConverterOption.NumberStyles(NumberStyles.Float | NumberStyles.AllowThousands);
-                Map(x => x.CompoundName).Name("Compound Name", "Name");
+                var index = 0;
+                Map(x => x.CompoundName).Name("Compound Name", "Name").Index(index++);
+                Map(x => x.PrecursorMz).Name("Precursor (m/z)", "Precursor", "Parent").Index(index++).TypeConverterOption.NumberStyles(NumberStyles.Float | NumberStyles.AllowThousands);
+                Map(x => x.Threshold).Name("Threshold").Index(index++).TypeConverterOption.NumberStyles(NumberStyles.Float | NumberStyles.AllowThousands).TypeConverterOption.Format("0");
             }
         }
     }

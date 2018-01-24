@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using PRISM;
-using SrmHeavyQC;
 
 namespace SrmHeavyChecker
 {
@@ -32,6 +31,15 @@ namespace SrmHeavyChecker
         [Option("ow", "overwrite", Required = false, HelpText = "If specified, all files will be processed, even if existing output was created with the same settings.")]
         public bool OverwriteOutput { get; set; }
 
+        [Option("outThresholds", Required = false, HelpText = "If specified, creates a per-compound thresholds file for all compounds that pass the minimum threshold (averaged across processed files)")]
+        public bool CreateThresholdsFile { get; set; }
+
+        [Option("outThresholdsPct", Required = false, HelpText = "The percentage of the averaged total intensity that should be output as the threshold", Min = 0.01, Max = 0.99)]
+        public double CreatedThresholdsFileThresholdLevel { get; set; }
+
+        [Option("outThresholdsPath", Required = false, HelpText = "The path where the output threshold file should be created", HelpShowsDefault = false)]
+        public string CompoundThresholdOutputFilePath { get; set; }
+
         public string CompoundThresholdFileSha1Hash { get; set; }
 
         public List<string> FilesToProcessList { get; }
@@ -47,6 +55,7 @@ namespace SrmHeavyChecker
             FileFilter = "*.raw";
             MaxThreads = 0;
             OverwriteOutput = false;
+            CreatedThresholdsFileThresholdLevel = 0.50;
         }
 
         public bool Validate()
@@ -93,6 +102,22 @@ namespace SrmHeavyChecker
                 catch
                 {
                     Console.WriteLine("ERROR: Output folder \"{0}\" does not exist, and could not be created!", OutputFolder);
+                    return false;
+                }
+            }
+
+            if (CreateThresholdsFile)
+            {
+                if (string.IsNullOrWhiteSpace(CompoundThresholdOutputFilePath))
+                {
+                    Console.WriteLine("ERROR: When creating a thresholds output file, a path must be provided!");
+                    return false;
+                }
+
+                var directory = Path.GetDirectoryName(CompoundThresholdOutputFilePath);
+                if (!Directory.Exists(directory))
+                {
+                    Console.WriteLine("ERROR: Thresholds output file folder does not exist!: \"{0}\"", directory);
                     return false;
                 }
             }

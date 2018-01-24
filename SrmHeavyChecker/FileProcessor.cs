@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using SrmHeavyQC;
@@ -31,9 +33,14 @@ namespace SrmHeavyChecker
                 };
                 Parallel.ForEach(options.FilesToProcess, parallelOptions, x => ProcessFile(options, x));
             }
+
+            if (options.CreateThresholdsFile)
+            {
+                CreateThresholdsFile(options);
+            }
         }
 
-        private void ProcessFile(IOptions options, string rawFilePath)
+        private string GetOutputFileForDataset(IOptions options, string rawFilePath)
         {
             var outputFileName = Path.GetFileNameWithoutExtension(rawFilePath) + "_heavyPeaks.tsv";
             var outputFolder = Path.GetDirectoryName(rawFilePath);
@@ -46,7 +53,12 @@ namespace SrmHeavyChecker
                 outputFolder = ".";
             }
 
-            var outputFilePath = Path.Combine(outputFolder, outputFileName);
+            return Path.Combine(outputFolder, outputFileName);
+        }
+
+        private void ProcessFile(IOptions options, string rawFilePath)
+        {
+            var outputFilePath = GetOutputFileForDataset(options, rawFilePath);
 
             if (!options.OverwriteOutput && File.Exists(outputFilePath) && CompoundData.CheckSettings(outputFilePath, options))
             {
@@ -69,6 +81,35 @@ namespace SrmHeavyChecker
                 CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
             }
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
+        }
+
+        private void CreateThresholdsFile(IOptions options)
+        {
+            Console.WriteLine("Creating per-compound thresholds file...");
+            var allResults = new List<CompoundData>();
+            foreach (var dataset in options.FilesToProcess)
+            {
+                var resultFilePath = GetOutputFileForDataset(options, dataset);
+                var results = CompoundData.ReadCombinedResultsFile(resultFilePath);
+                allResults.AddRange(results);
+            }
+
+            // Group the passing results
+            var grouped = allResults.Where(x => x.PassesThreshold).GroupBy(x => x.CompoundName);
+            var thresholds = new List<CompoundThresholdData>();
+            foreach (var group in grouped)
+            {
+                var groupData = group.ToList();
+                var threshold = new CompoundThresholdData();
+                threshold.CompoundName = group.Key;
+                threshold.PrecursorMz = groupData[0].PrecursorMz;
+                var averageTotalIntensity = groupData.Average(x => x.TotalIntensitySum);
+                threshold.Threshold = averageTotalIntensity * options.CreatedThresholdsFileThresholdLevel;
+                thresholds.Add(threshold);
+            }
+
+            CompoundThresholdData.WriteToFile(options.CompoundThresholdOutputFilePath, thresholds);
+            Console.WriteLine("Created per-compound thresholds file.");
         }
     }
 }
