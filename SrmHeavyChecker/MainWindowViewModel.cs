@@ -27,6 +27,7 @@ namespace SrmHeavyChecker
         public DatasetGridViewModel AvailableDatasetsViewModel { get; } = new DatasetGridViewModel();
         public DatasetGridViewModel DatasetsToProcessViewModel { get; } = new DatasetGridViewModel();
         public DatasetGridViewModel ProcessingQueueViewModel { get; } = new DatasetGridViewModel();
+        public IReadOnlyReactiveList<Plotting.ExportFormat> ExportFormats { get; }
 
         public string WorkFolder
         {
@@ -114,6 +115,8 @@ namespace SrmHeavyChecker
             this.WhenAnyValue(x => x.WorkFolderRecurse, x => x.ExcludeArchived).Subscribe(x => LoadDatasets());
             this.WhenAnyValue(x => x.Status).Select(x => x.ToLower().Contains("error")).ToProperty(this, x => x.StatusIsError, out statusIsError, false);
             IsNotRunning = true;
+
+            ExportFormats = new ReactiveList<Plotting.ExportFormat>(Enum.GetValues(typeof(Plotting.ExportFormat)).Cast<Plotting.ExportFormat>());
         }
 
         private void CancelProcessing()

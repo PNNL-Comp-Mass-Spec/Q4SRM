@@ -10,14 +10,16 @@ namespace SrmHeavyChecker
         [DllImport("kernel32.dll")]
         static extern bool FreeConsole();
 
-        [STAThread]
+        //[STAThread]
         public static void Main(string[] args)
         {
             if (args.Length == 0)
             {
                 FreeConsole();
                 // Run GUI
-                new App().Run();
+                var thread = new Thread(() => { new App().Run(); });
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.Start();
                 return;
             }
 

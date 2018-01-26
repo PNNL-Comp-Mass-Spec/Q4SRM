@@ -22,5 +22,7 @@ namespace SrmHeavyChecker
         string CompoundThresholdOutputFilePath { get; }
 
         string SummaryStatsFilePath { get; }
+
+        Plotting.ExportFormat ImageSaveFormat { get; }
     }
 }

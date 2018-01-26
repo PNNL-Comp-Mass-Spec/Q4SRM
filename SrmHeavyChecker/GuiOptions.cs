@@ -22,6 +22,7 @@ namespace SrmHeavyChecker
         private double createdThresholdsFileThresholdLevel;
         private string compoundThresholdOutputFilePath;
         private string summaryStatsFilePath;
+        private Plotting.ExportFormat imageSaveFormat;
 
         public string RawFilePath
         {
@@ -103,6 +104,12 @@ namespace SrmHeavyChecker
             set { this.RaiseAndSetIfChanged(ref summaryStatsFilePath, value); }
         }
 
+        public Plotting.ExportFormat ImageSaveFormat
+        {
+            get { return imageSaveFormat; }
+            set { this.RaiseAndSetIfChanged(ref imageSaveFormat, value); }
+        }
+
         public List<string> FilesToProcessList { get; } = new List<string>();
         public int MaxThreadsUsable { get; }
 
@@ -122,6 +129,7 @@ namespace SrmHeavyChecker
             CreateThresholdsFile = false;
             CreatedThresholdsFileThresholdLevel = 0.50;
             SummaryStatsFilePath = SummaryStatsFileDefaultName;
+            ImageSaveFormat = Plotting.ExportFormat.PNG;
         }
 
         /// <summary>

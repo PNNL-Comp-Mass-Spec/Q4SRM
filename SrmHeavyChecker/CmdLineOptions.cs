@@ -47,6 +47,9 @@ namespace SrmHeavyChecker
         [Option("summaryPath", Required = false, HelpText = "Path where processing summary tsv should be written. Default is [out folder/raw file folder]\\HeavySummary.tsv", HelpShowsDefault = false)]
         public string SummaryStatsFilePath { get; set; }
 
+        [Option("img", Required = false, HelpText = "Format for the saved total intensity vs. time plot")]
+        public Plotting.ExportFormat ImageSaveFormat { get; set; }
+
         public List<string> FilesToProcessList { get; }
         public IList<string> FilesToProcess => FilesToProcessList;
 
@@ -61,6 +64,7 @@ namespace SrmHeavyChecker
             MaxThreads = 0;
             OverwriteOutput = false;
             CreatedThresholdsFileThresholdLevel = 0.50;
+            ImageSaveFormat = Plotting.ExportFormat.PNG;
         }
 
         public bool Validate()

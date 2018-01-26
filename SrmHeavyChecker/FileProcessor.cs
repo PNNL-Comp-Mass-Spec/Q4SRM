@@ -76,6 +76,7 @@ namespace SrmHeavyChecker
                 //Console.WriteLine("File \"{0}\": CombinedResults: {1}", rawFilePath, combined.Count);
 
                 CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
+                Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), outputFilePath, options.ImageSaveFormat);
             }
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
         }
