@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ReactiveUI;
 
 namespace SrmHeavyChecker
 {
     public class DatasetInfo : ReactiveObject
     {
-        private string updateNote = "";
+        private string note = "";
         private bool datasetUpdated = false;
         private bool processingWarning = false;
         private bool updateError = false;
@@ -19,10 +15,10 @@ namespace SrmHeavyChecker
         public string DatasetFolder { get; }
         public DateTime AcquisitionDate { get; }
 
-        public string UpdateNote
+        public string Note
         {
-            get { return updateNote; }
-            set { this.RaiseAndSetIfChanged(ref updateNote, value); }
+            get { return note; }
+            set { this.RaiseAndSetIfChanged(ref note, value); }
         }
 
         public bool DatasetUpdated
