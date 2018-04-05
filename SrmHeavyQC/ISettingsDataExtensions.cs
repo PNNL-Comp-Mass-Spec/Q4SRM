@@ -60,9 +60,10 @@ namespace SrmHeavyQC
             var defaultThreshold = match.Groups["defaultThreshold"].Value;
             if (!string.IsNullOrWhiteSpace(defaultThreshold))
             {
-                settings.DefaultThreshold = double.Parse(match.Groups["defaultThreshold"].Value);
+                settings.DefaultThreshold = double.Parse(defaultThreshold);
             }
 
+            // if not match, the value is string.Empty. (also .Success will be false)
             settings.CompoundThresholdFilePath = match.Groups["filepath"].Value.Trim().Trim('"', '\'');
             settings.CompoundThresholdFileSha1Hash = match.Groups["fileHash"].Value.Trim();
         }
