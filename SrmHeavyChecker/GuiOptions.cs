@@ -12,6 +12,7 @@ namespace SrmHeavyChecker
         public const string SummaryStatsFileDefaultName = "HeavySummary.tsv";
         private string rawFilePath;
         private double defaultThreshold;
+        private double edgeNETThresholdMinutes;
         private string compoundThresholdFilePath;
         private string outputFolder;
         private int maxThreads;
@@ -34,6 +35,12 @@ namespace SrmHeavyChecker
         {
             get { return defaultThreshold; }
             set { this.RaiseAndSetIfChanged(ref defaultThreshold, value); }
+        }
+
+        public double EdgeNETThresholdMinutes
+        {
+            get { return edgeNETThresholdMinutes; }
+            set { this.RaiseAndSetIfChanged(ref edgeNETThresholdMinutes, value); }
         }
 
         public string CompoundThresholdFilePath
@@ -122,6 +129,7 @@ namespace SrmHeavyChecker
             RawFilePath = "";
             CompoundThresholdFilePath = "";
             DefaultThreshold = 10000;
+            EdgeNETThresholdMinutes = 0.5;
             MaxThreads = SystemInfo.GetCoreCount();
             UseOutputFolder = false;
             UseCompoundThresholdsFile = false;

@@ -99,6 +99,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -118,21 +119,24 @@
                     </DockPanel>
                     <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum summed intensity to pass" />
                     <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Margin="3" Minimum="1" Value="{Binding Options.DefaultThreshold}" />
-                    <CheckBox Grid.Row="4" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Use per-compound thresholds" IsChecked="{Binding Options.UseCompoundThresholdsFile}" />
-                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.CompoundThresholdFilePath}" />
-                    <Button Grid.Row="4" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsFileCommand}" />
-                    <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap"
+                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum NET distance from edge" />
+                    <xctk:DoubleUpDown Grid.Row="4" Grid.Column="1" Margin="3" Minimum="0" Increment="0.1" FormatString="F2" Value="{Binding Options.EdgeNETThresholdMinutes}" />
+                    <TextBlock Grid.Row="4" Grid.Column="2" Margin="3" VerticalAlignment="Center" Text="minutes from elution window edge" />
+                    <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Use per-compound thresholds" IsChecked="{Binding Options.UseCompoundThresholdsFile}" />
+                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.CompoundThresholdFilePath}" />
+                    <Button Grid.Row="5" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsFileCommand}" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" TextWrapping="Wrap"
                                Text="Requires a tab-separated file with the columns 'Compound Name' (req), 'Threshold' (req), and 'Precursor (m/z)' (opt). These override the minimum peak area for matching compounds."
                                Visibility="{Binding Options.UseCompoundThresholdsFile, Converter={StaticResource BoolToVis}}" />
-                    <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Summary stats file path" />
-                    <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.SummaryStatsFilePath}" />
-                    <Button Grid.Row="6" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForStatsFileCommand}" />
-                    <CheckBox Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" VerticalAlignment="Center" Content="Create a per-compound thresholds file for all compounds that pass the minimum threshold (averaged across processed files)" IsChecked="{Binding Options.CreateThresholdsFile}" />
-                    <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Output Threshold level" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
-                    <xctk:DoubleUpDown Grid.Row="8" Grid.Column="1" Margin="3" Minimum="0.01" Maximum="0.99" Value="{Binding Options.CreatedThresholdsFileThresholdLevel}" Increment="0.01" FormatString="P0" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
-                    <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Per-compound output file" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
-                    <TextBox Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.CompoundThresholdOutputFilePath}" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
-                    <Button Grid.Row="9" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsOutputFileCommand}" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                    <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Summary stats file path" />
+                    <TextBox Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.SummaryStatsFilePath}" />
+                    <Button Grid.Row="7" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForStatsFileCommand}" />
+                    <CheckBox Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4" Margin="3" VerticalAlignment="Center" Content="Create a per-compound thresholds file for all compounds that pass the minimum threshold (averaged across processed files)" IsChecked="{Binding Options.CreateThresholdsFile}" />
+                    <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Output Threshold level" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                    <xctk:DoubleUpDown Grid.Row="9" Grid.Column="1" Margin="3" Minimum="0.01" Maximum="0.99" Value="{Binding Options.CreatedThresholdsFileThresholdLevel}" Increment="0.01" FormatString="P0" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                    <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Per-compound output file" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                    <TextBox Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.CompoundThresholdOutputFilePath}" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
+                    <Button Grid.Row="10" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsOutputFileCommand}" Visibility="{Binding Options.CreateThresholdsFile, Converter={StaticResource BoolToVis}}" />
                 </Grid>
             </ScrollViewer>
         </Grid>

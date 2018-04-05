@@ -26,7 +26,7 @@ namespace SrmHeavyQC
 
         public static string ConvertToTsvComment(this ISettingsData settings)
         {
-            var formatted = $"DefaultThreshold: {settings.DefaultThreshold:0.###}";
+            var formatted = $"DefaultThreshold: {settings.DefaultThreshold:0.###}; NET time threshold (min): {settings.EdgeNETThresholdMinutes:0.###}";
 
             if (!string.IsNullOrWhiteSpace(settings.CompoundThresholdFilePath))
             {
@@ -51,7 +51,7 @@ namespace SrmHeavyQC
             return CompoundThresholdData.ConvertToSearchMap(thresholds);
         }
 
-        private static Regex TsvCommentSettingsRegex = new Regex(@"DefaultThreshold: (?<defaultThreshold>\d+\.?\d*)(; CompoundThresholdsFile: (?<filepath>.*); SHA1Hash (?<fileHash>.*))?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static Regex TsvCommentSettingsRegex = new Regex(@"DefaultThreshold: (?<defaultThreshold>\d+\.?\d*)(; NET time threshold \(min\): (?<netTimeThreshold>\d+\.?\d*))?(; CompoundThresholdsFile: (?<filepath>.*); SHA1Hash (?<fileHash>.*))?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static void PopulateFromTsvComment(this ISettingsData settings, string tsvCommentLine)
         {
@@ -61,6 +61,12 @@ namespace SrmHeavyQC
             if (!string.IsNullOrWhiteSpace(defaultThreshold))
             {
                 settings.DefaultThreshold = double.Parse(defaultThreshold);
+            }
+
+            var netTimeThreshold = match.Groups["netTimeThreshold"].Value;
+            if (!string.IsNullOrWhiteSpace(netTimeThreshold))
+            {
+                settings.EdgeNETThresholdMinutes = double.Parse(netTimeThreshold);
             }
 
             // if not match, the value is string.Empty. (also .Success will be false)

@@ -18,6 +18,9 @@ namespace SrmHeavyChecker
         [Option("filter", Required = false, HelpText = "If raw file path is a folder, a file filter string (supports '*' wildcard)")]
         public string FileFilter { get; set; }
 
+        [Option("m", Required = false, HelpText = "Time (in minutes) that a peak must be away from the edge of the target window for it to be considered \"passing\"", Min = 0)]
+        public double EdgeNETThresholdMinutes { get; set; }
+
         [Option("t", Required = false, HelpText = "Peak area threshold for a compound to be considered \"passing\"", Min = 0)]
         public double DefaultThreshold { get; set; }
 
@@ -58,6 +61,7 @@ namespace SrmHeavyChecker
             RawFilePath = "";
             CompoundThresholdFilePath = "";
             DefaultThreshold = 10000;
+            EdgeNETThresholdMinutes = 0.5;
             FilesToProcessList = new List<string>();
             Recurse = false;
             FileFilter = "*.raw";

@@ -129,7 +129,7 @@ namespace SrmHeavyQC
             {
                 if (!combined.TryGetValue(item.CompoundName, out var group))
                 {
-                    group = new CompoundData(item) { Threshold = settings.DefaultThreshold };
+                    group = new CompoundData(item) { Threshold = settings.DefaultThreshold, EdgeNETThresholdMinutes = settings.EdgeNETThresholdMinutes };
                     // Look for and handle custom thresholds
                     if (compoundThresholds.TryGetValue(item.CompoundName, out var cThreshold))
                     {

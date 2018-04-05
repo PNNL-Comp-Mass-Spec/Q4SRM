@@ -37,12 +37,7 @@ namespace SrmHeavyChecker
                 return;
             }
 
-            var selector = new Func<CompoundData, ScatterPoint>(x =>
-                new ScatterPoint((x.StartTimeMinutes + x.StopTimeMinutes) / 2, x.TotalIntensitySum));
-            var passed = results.Where(x => x.PassesThreshold).Select(selector).ToList();
-            var failed = results.Where(x => !x.PassesThreshold).Select(selector).ToList();
-
-            var plot = CreatePlotFromData(datasetName, passed, failed, "Passed", "Failed", format);
+            var plot = CreatePlot(results, datasetName, format);
 
             switch (format)
             {
@@ -61,6 +56,24 @@ namespace SrmHeavyChecker
                 default:
                     break;
             }
+        }
+
+        public static PlotModel CreatePlot(List<CompoundData> results, string datasetName, ExportFormat format = ExportFormat.PNG)
+        {
+            if (format == ExportFormat.NoImageExport)
+            {
+                return null;
+            }
+
+            var selector = new Func<CompoundData, ScatterPoint>(x =>
+                new ScatterPoint((x.StartTimeMinutes + x.StopTimeMinutes) / 2, x.TotalIntensitySum));
+            var passed = results.Where(x => x.PassesThreshold && x.PassesNET).Select(selector).ToList();
+            var edge = results.Where(x => x.PassesThreshold && !x.PassesNET).Select(selector).ToList();
+            var failed = results.Where(x => !x.PassesThreshold).Select(selector).ToList();
+
+            var plot = CreatePlotFromData(datasetName, passed, edge, failed, "Passed", "NET Edge", "Failed", format);
+
+            return plot;
         }
 
         /// <summary>
@@ -136,7 +149,7 @@ namespace SrmHeavyChecker
             }
         }
 
-        private static PlotModel CreatePlotFromData(string title, List<ScatterPoint> greenPoints, List<ScatterPoint> redPoints, string greenTitle, string redTitle, ExportFormat exFormat)
+        private static PlotModel CreatePlotFromData(string title, List<ScatterPoint> greenPoints, List<ScatterPoint> orangePoints, List<ScatterPoint> redPoints, string greenTitle, string orangeTitle, string redTitle, ExportFormat exFormat)
         {
             var plot = new OxyPlot.PlotModel()
             {
@@ -178,6 +191,7 @@ namespace SrmHeavyChecker
             //var spaceGap = new string('\u00A0', 2);
 
             string greenFmtted;
+            string orangeFmtted;
             string redFmtted;
 
             switch (exFormat)
@@ -187,15 +201,16 @@ namespace SrmHeavyChecker
                     // These don't use Windows WPF rendering, so we can't determine text width correctly for the output.
                     goto default;
                 case ExportFormat.PNG:
-                    SetCombinedTextToEqualWidth(greenTitle, $"({greenPoints.Count})", redTitle, $"({redPoints.Count})", 2, out greenFmtted, out redFmtted, plot.LegendFontSize, typeface);
+                    SetCombinedTextToEqualWidth(greenTitle, $"({greenPoints.Count})", orangeTitle, $"({orangePoints.Count})", redTitle, $"({redPoints.Count})", 2, out greenFmtted, out orangeFmtted, out redFmtted, plot.LegendFontSize, typeface);
                     break;
                 default:
                     greenFmtted = $"{greenTitle} {"(" + greenPoints.Count + ")",6}";
+                    orangeFmtted = $"{orangeTitle} {"(" + orangePoints.Count + ")",6}";
                     redFmtted = $"{redTitle} {"(" + redPoints.Count + ")",6}";
                     break;
             }
 
-            SetCombinedTextToEqualWidth(greenTitle, $"({greenPoints.Count})", redTitle, $"({redPoints.Count})", 2, out greenFmtted, out redFmtted, plot.LegendFontSize, typeface);
+            // TODO: Add custom tracker, showing sequence, net (at a minimum)
 
             var greenSeries = new ScatterSeries
             {
@@ -207,6 +222,18 @@ namespace SrmHeavyChecker
                 MarkerSize = seriesPointMarkerSize,
                 MarkerFill = OxyColors.Green,
                 ItemsSource = greenPoints,
+            };
+
+            var orangeSeries = new ScatterSeries
+            {
+                //Title = redTitle,
+                //Title = redTitleFmtted + spaceGap + redCountFmtted,
+                Title = orangeFmtted,
+                MarkerType = MarkerType.Diamond,
+                MarkerStrokeThickness = seriesPointStrokeThickness,
+                MarkerSize = seriesPointMarkerSize,
+                MarkerFill = OxyColors.Orange,
+                ItemsSource = orangePoints,
             };
 
             var redSeries = new ScatterSeries
@@ -266,6 +293,7 @@ namespace SrmHeavyChecker
             plot.Axes.Add(yAxis);
             plot.Axes.Add(xAxis);
             plot.Series.Add(greenSeries);
+            plot.Series.Add(orangeSeries);
             plot.Series.Add(redSeries);
             //plot.Annotations.Add(annotation);
 
@@ -274,7 +302,7 @@ namespace SrmHeavyChecker
 
         #region Fancy text formatting
 
-        private static void SetCombinedTextToEqualWidth(string in1P1, string in1P2, string in2P1, string in2P2, int gapSpaceCount, out string out1, out string out2,
+        private static void SetCombinedTextToEqualWidth(string in1P1, string in1P2, string in2P1, string in2P2, string in3P1, string in3P2, int gapSpaceCount, out string out1, out string out2, out string out3,
             double fontSize, Typeface typeface = null)
         {
             if (typeface == null)
@@ -282,54 +310,71 @@ namespace SrmHeavyChecker
                 typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Medium);
             }
 
-            SetTextToEqualWidth(in1P1, in2P1, out var in1P1Fmt, out var in2P1Fmt, fontSize, false, false, typeface);
-            SetTextToEqualWidth(in1P2, in2P2, out var in1P2Fmt, out var in2P2Fmt, fontSize, true, false, typeface);
+            SetTextToEqualWidth(in1P1, in2P1, in3P1, out var in1P1Fmt, out var in2P1Fmt, out var in3P1Fmt, fontSize, false, false, typeface);
+            SetTextToEqualWidth(in1P2, in2P2, in3P2, out var in1P2Fmt, out var in2P2Fmt, out var in3P2Fmt, fontSize, true, false, typeface);
 
             var gapSpaces = new string('\u00A0', Math.Max(gapSpaceCount, 0));
 
             var in1Fmtted = new FormattedText(in1P1Fmt + gapSpaces + in1P2Fmt, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
             var in2Fmtted = new FormattedText(in2P1Fmt + gapSpaces + in2P2Fmt, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
+            var in3Fmtted = new FormattedText(in3P1Fmt + gapSpaces + in3P2Fmt, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
             var in1Width = in1Fmtted.Width;
             var in2Width = in2Fmtted.Width;
+            var in3Width = in3Fmtted.Width;
 
             var calcIn1Width = in1Width;
             var calcIn2Width = in2Width;
+            var calcIn3Width = in3Width;
 
             var spaceWidths = GetSpaceWidthsForFontSettings(fontSize, typeface);
 
             foreach (var spaceType in spaceWidths.OrderByDescending(x => x.Value))
             {
-                if (calcIn2Width - calcIn1Width >= spaceType.Value)
+                if (Math.Max(calcIn2Width, calcIn3Width) - calcIn1Width >= spaceType.Value)
                 {
                     in1P1Fmt += spaceType.Key;
                     calcIn1Width += spaceType.Value;
                 }
-                else if (calcIn1Width - calcIn2Width >= spaceType.Value)
+                if (Math.Max(calcIn1Width, calcIn3Width) - calcIn2Width >= spaceType.Value)
                 {
                     in2P1Fmt += spaceType.Key;
                     calcIn2Width += spaceType.Value;
                 }
+                if (Math.Max(calcIn1Width, calcIn2Width) - calcIn3Width >= spaceType.Value)
+                {
+                    in3P1Fmt += spaceType.Key;
+                    calcIn3Width += spaceType.Value;
+                }
             }
 
             var littleSpace = spaceWidths.Where(x => x.Value > 0.5).OrderBy(x => x.Value).First();
-            if (calcIn2Width - calcIn1Width > 0 && (calcIn1Width + littleSpace.Value) - calcIn2Width < calcIn2Width - calcIn1Width)
+            var max12 = Math.Max(calcIn1Width, calcIn2Width);
+            var max13 = Math.Max(calcIn1Width, calcIn3Width);
+            var max23 = Math.Max(calcIn2Width, calcIn3Width);
+            if (max23 - calcIn1Width > 0 && (calcIn1Width + littleSpace.Value) - max23 < max23 - calcIn1Width)
             {
                 in1P1Fmt += littleSpace.Key;
                 calcIn1Width += littleSpace.Value;
             }
-            else if (calcIn1Width - calcIn2Width > 0 && (calcIn2Width + littleSpace.Value) - calcIn1Width < calcIn1Width - calcIn2Width)
+            if (max13 - calcIn2Width > 0 && (calcIn2Width + littleSpace.Value) - max13 < max13 - calcIn2Width)
             {
                 in2P1Fmt += littleSpace.Key;
                 calcIn2Width += littleSpace.Value;
+            }
+            if (max12 - calcIn3Width > 0 && (calcIn3Width + littleSpace.Value) - max12 < max12 - calcIn3Width)
+            {
+                in3P1Fmt += littleSpace.Key;
+                calcIn3Width += littleSpace.Value;
             }
 
             //Console.WriteLine("{0,8:F3} {1,8:F3}", in1Width, calcIn1Width);
             //Console.WriteLine("{0,8:F3} {1,8:F3}", in2Width, calcIn2Width);
             out1 = in1P1Fmt + gapSpaces + in1P2Fmt;
             out2 = in2P1Fmt + gapSpaces + in2P2Fmt;
+            out3 = in3P1Fmt + gapSpaces + in3P2Fmt;
         }
 
-        private static void SetTextToEqualWidth(string in1, string in2, out string out1, out string out2, double fontSize, bool padFront = false, bool fillDiff = true, Typeface typeface = null)
+        private static void SetTextToEqualWidth(string in1, string in2, string in3, out string out1, out string out2, out string out3, double fontSize, bool padFront = false, bool fillDiff = true, Typeface typeface = null)
         {
             if (typeface == null)
             {
@@ -338,14 +383,18 @@ namespace SrmHeavyChecker
 
             out1 = in1;
             out2 = in2;
+            out3 = in3;
 
             var in1Fmtted = new FormattedText(in1, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
             var in2Fmtted = new FormattedText(in2, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
+            var in3Fmtted = new FormattedText(in3, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
             var in1Width = in1Fmtted.Width;
             var in2Width = in2Fmtted.Width;
-            var bigWidth = Math.Max(in1Width, in2Width);
+            var in3Width = in2Fmtted.Width;
+            var bigWidth = Math.Max(Math.Max(in1Width, in2Width), in3Width);
             var in1WidthDiff = bigWidth - in1Width;
             var in2WidthDiff = bigWidth - in2Width;
+            var in3WidthDiff = bigWidth - in3Width;
 
             var spaceWidths = GetSpaceWidthsForFontSettings(fontSize, typeface);
             var spaceWidth = spaceWidths["\u00A0"];
@@ -354,30 +403,35 @@ namespace SrmHeavyChecker
             //var in2WidthAdd = (int)Math.Round(in2WidthDiff / spaceWidth);
             var in1WidthAdd = (int)(in1WidthDiff / spaceWidth); // Truncate decimals, to leave better gaps for filling
             var in2WidthAdd = (int)(in2WidthDiff / spaceWidth); // Truncate decimals, to leave better gaps for filling
+            var in3WidthAdd = (int)(in3WidthDiff / spaceWidth); // Truncate decimals, to leave better gaps for filling
 
             var calcIn1Width = in1Width + in1WidthAdd * spaceWidth;
             var calcIn2Width = in2Width + in2WidthAdd * spaceWidth;
+            var calcIn3Width = in3Width + in3WidthAdd * spaceWidth;
             //var calcIn1WidthOrig = calcIn1Width;
             //var calcIn2WidthOrig = calcIn2Width;
 
             var out1Spaces = new string('\u00A0', Math.Max(in1WidthAdd, 0));
             var out2Spaces = new string('\u00A0', Math.Max(in2WidthAdd, 0));
+            var out3Spaces = new string('\u00A0', Math.Max(in3WidthAdd, 0));
             if (padFront)
             {
                 out1 = out1Spaces + out1;
                 out2 = out2Spaces + out2;
+                out3 = out3Spaces + out3;
             }
             else
             {
                 out1 += out1Spaces;
                 out2 += out2Spaces;
+                out3 += out3Spaces;
             }
 
             if (fillDiff)
             {
                 foreach (var spaceType in spaceWidths.OrderByDescending(x => x.Value))
                 {
-                    if (calcIn2Width - calcIn1Width >= spaceType.Value)
+                    if (Math.Max(calcIn2Width, calcIn3Width) - calcIn1Width >= spaceType.Value)
                     {
                         if (padFront)
                         {
@@ -390,7 +444,7 @@ namespace SrmHeavyChecker
 
                         calcIn1Width += spaceType.Value;
                     }
-                    else if (calcIn1Width - calcIn2Width >= spaceType.Value)
+                    if (Math.Max(calcIn1Width, calcIn3Width) - calcIn2Width >= spaceType.Value)
                     {
                         if (padFront)
                         {
@@ -402,6 +456,19 @@ namespace SrmHeavyChecker
                         }
 
                         calcIn2Width += spaceType.Value;
+                    }
+                    if (Math.Max(calcIn1Width, calcIn2Width) - calcIn3Width >= spaceType.Value)
+                    {
+                        if (padFront)
+                        {
+                            out3 = spaceType.Key + out3;
+                        }
+                        else
+                        {
+                            out3 += spaceType.Key;
+                        }
+
+                        calcIn3Width += spaceType.Value;
                     }
                 }
             }

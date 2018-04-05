@@ -27,8 +27,11 @@ namespace SrmHeavyQC
         public double MaxIntensityNet { get; private set; }
 
         public double Threshold { get; set; }
+        public double EdgeNETThresholdMinutes { get; set; }
 
+        public bool PassesThresholdAndNET { get; private set; }
         public bool PassesThreshold { get; private set; }
+        public bool PassesNET { get; set; }
 
         private readonly bool isPopulatedFromResultsFile = false;
 
@@ -79,6 +82,10 @@ namespace SrmHeavyQC
             var maxIntTrans = Transitions.OrderByDescending(x => x.MaxIntensity).First();
             MaxIntensity = maxIntTrans.MaxIntensity;
             MaxIntensityNet = (maxIntTrans.MaxIntensityTime - maxIntTrans.StartTimeMinutes) / (maxIntTrans.StopTimeMinutes - maxIntTrans.StartTimeMinutes);
+            var edgeNetThreshold = (EdgeNETThresholdMinutes) / (maxIntTrans.StopTimeMinutes - maxIntTrans.StartTimeMinutes);
+            PassesNET = edgeNetThreshold <= MaxIntensityNet && MaxIntensityNet <= 1 - edgeNetThreshold;
+            PassesThresholdAndNET = PassesThreshold && PassesNET;
+
             var fullIntensityList = new List<double>();
             foreach (var result in Transitions)
             {
@@ -207,7 +214,9 @@ namespace SrmHeavyQC
                 Map(x => x.StartTimeMinutes).Name("Start Time (min)").Index(index++);
                 Map(x => x.StopTimeMinutes).Name("Stop Time (min)").Index(index++);
                 Map(x => x.TotalIntensitySum).Name("TotalIntensity").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.PassesThresholdAndNET).Name("Passes All Checks").Index(index++);
                 Map(x => x.PassesThreshold).Name("Passes Threshold").Index(index++);
+                Map(x => x.PassesNET).Name("Passes NET").Index(index++);
                 Map(x => x.MaxIntensity).Name("IntensityMax").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 Map(x => x.MaxIntensityNet).Name("IntensityMaxNET").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 Map(x => x.IntensityRatioMaxVsMedian).Name("IntensityRatioMaxVsMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
