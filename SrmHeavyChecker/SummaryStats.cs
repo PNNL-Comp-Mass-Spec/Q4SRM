@@ -19,7 +19,7 @@ namespace SrmHeavyChecker
         {
             DatasetName = datasetName;
             PeptideCount = datasetResults.Count;
-            PeptideCountPassing = datasetResults.Count(x => x.PassesThreshold);
+            PeptideCountPassing = datasetResults.Count(x => x.PassesThresholdAndNET);
             TotalIntensityAvg = datasetResults.Average(x => x.TotalIntensitySum);
             TotalIntensityMedian = datasetResults.Median(x => x.TotalIntensitySum);
         }
