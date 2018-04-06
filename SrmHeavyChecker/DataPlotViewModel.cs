@@ -44,11 +44,11 @@ namespace SrmHeavyChecker
         {
             statusUpdate = statusUpdater;
 
-            BrowseForResultsFileCommand = ReactiveCommand.Create(BrowseForResultsFile);
+            BrowseForResultsFileCommand = ReactiveCommand.CreateFromTask(BrowseForResultsFile);
             OpenResultsFileCommand = ReactiveCommand.CreateFromTask(OpenResultsFile, this.WhenAnyValue(x => x.ResultsFilePath).Select(x => !string.IsNullOrWhiteSpace(x) && File.Exists(x)));
         }
 
-        private void BrowseForResultsFile()
+        private async Task BrowseForResultsFile()
         {
             var dialog = new CommonOpenFileDialog
             {
@@ -67,9 +67,12 @@ namespace SrmHeavyChecker
             var result = dialog.ShowDialog();
             if (result == CommonFileDialogResult.Ok)
             {
-                var filePath = dialog.FileName;
+                ResultsFilePath = dialog.FileName;
 
-                ResultsFilePath = filePath;
+                if (!string.IsNullOrWhiteSpace(ResultsFilePath))
+                {
+                    await OpenResultsFile();
+                }
             }
         }
 
@@ -77,7 +80,7 @@ namespace SrmHeavyChecker
         {
             if (string.IsNullOrWhiteSpace(ResultsFilePath) || !File.Exists(ResultsFilePath))
             {
-                statusUpdate($"Error: file {ResultsFilePath} does not exist.");
+                statusUpdate($"Error: file \"{ResultsFilePath}\" does not exist.");
                 return;
             }
 
