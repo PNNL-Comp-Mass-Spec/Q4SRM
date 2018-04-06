@@ -65,11 +65,9 @@ namespace SrmHeavyChecker
                 return null;
             }
 
-            var selector = new Func<CompoundData, ScatterPoint>(x =>
-                new ScatterPoint((x.StartTimeMinutes + x.StopTimeMinutes) / 2, x.TotalIntensitySum));
-            var passed = results.Where(x => x.PassesThreshold && x.PassesNET).Select(selector).ToList();
-            var edge = results.Where(x => x.PassesThreshold && !x.PassesNET).Select(selector).ToList();
-            var failed = results.Where(x => !x.PassesThreshold).Select(selector).ToList();
+            var passed = results.Where(x => x.PassesThreshold && x.PassesNET).ToList();
+            var edge = results.Where(x => x.PassesThreshold && !x.PassesNET).ToList();
+            var failed = results.Where(x => !x.PassesThreshold).ToList();
 
             var plot = CreatePlotFromData(datasetName, passed, edge, failed, "Passed", "NET Edge", "Failed", format);
 
@@ -149,7 +147,7 @@ namespace SrmHeavyChecker
             }
         }
 
-        private static PlotModel CreatePlotFromData(string title, List<ScatterPoint> greenPoints, List<ScatterPoint> orangePoints, List<ScatterPoint> redPoints, string greenTitle, string orangeTitle, string redTitle, ExportFormat exFormat)
+        private static PlotModel CreatePlotFromData(string title, List<CompoundData> greenPoints, List<CompoundData> orangePoints, List<CompoundData> redPoints, string greenTitle, string orangeTitle, string redTitle, ExportFormat exFormat)
         {
             var plot = new OxyPlot.PlotModel()
             {
@@ -165,10 +163,10 @@ namespace SrmHeavyChecker
 
             var allPoints = redPoints.ToList();
             allPoints.AddRange(greenPoints);
-            var xMax = allPoints.Max(x => x.X);
-            var xMin = allPoints.Min(x => x.X);
-            var yMax = allPoints.Max(x => x.Y);
-            var yMin = allPoints.Min(x => x.Y);
+            var xMax = allPoints.Max(x => x.ElutionTimeMidpoint);
+            var xMin = allPoints.Min(x => x.ElutionTimeMidpoint);
+            var yMax = allPoints.Max(x => x.TotalIntensitySum);
+            var yMin = allPoints.Min(x => x.TotalIntensitySum);
 
             double seriesPointStrokeThickness = 0;
             double seriesPointMarkerSize = Math.Max(3, 7 - Math.Log10(allPoints.Count));
@@ -210,42 +208,43 @@ namespace SrmHeavyChecker
                     break;
             }
 
-            // TODO: Add custom tracker, showing sequence, net (at a minimum)
+            var trackerFormatString = $"Compound: {{{nameof(CompoundData.CompoundName)}}}\nStart time: {{{nameof(CompoundData.StartTimeMinutes)}}}\nStop Time: {{{nameof(CompoundData.StopTimeMinutes)}}}\nTotal Abundance: {{{nameof(CompoundData.TotalIntensitySum)}}}\nMax Intensity: {{{nameof(CompoundData.MaxIntensity)}}}\nMax Intensity NET: {{{nameof(CompoundData.MaxIntensityNet)}}}";
+            var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((CompoundData) x).ElutionTimeMidpoint, ((CompoundData) x).TotalIntensitySum));
 
             var greenSeries = new ScatterSeries
             {
-                //Title = greenTitle,
-                //Title = greenTitleFmtted + spaceGap + greenCountFmtted,
                 Title = greenFmtted,
                 MarkerType = MarkerType.Circle,
                 MarkerStrokeThickness = seriesPointStrokeThickness,
                 MarkerSize = seriesPointMarkerSize,
                 MarkerFill = OxyColors.Green,
                 ItemsSource = greenPoints,
+                Mapping = pointMapper,
+                TrackerFormatString = trackerFormatString,
             };
 
             var orangeSeries = new ScatterSeries
             {
-                //Title = redTitle,
-                //Title = redTitleFmtted + spaceGap + redCountFmtted,
                 Title = orangeFmtted,
                 MarkerType = MarkerType.Diamond,
                 MarkerStrokeThickness = seriesPointStrokeThickness,
                 MarkerSize = seriesPointMarkerSize,
                 MarkerFill = OxyColors.Orange,
                 ItemsSource = orangePoints,
+                Mapping = pointMapper,
+                TrackerFormatString = trackerFormatString,
             };
 
             var redSeries = new ScatterSeries
             {
-                //Title = redTitle,
-                //Title = redTitleFmtted + spaceGap + redCountFmtted,
                 Title = redFmtted,
                 MarkerType = MarkerType.Triangle,
                 MarkerStrokeThickness = seriesPointStrokeThickness,
                 MarkerSize = seriesPointMarkerSize,
                 MarkerFill = OxyColors.Red,
                 ItemsSource = redPoints,
+                Mapping = pointMapper,
+                TrackerFormatString = trackerFormatString,
             };
 
             var yAxisMax = yMax * 20; // seems big, but it is a logarithmic scale

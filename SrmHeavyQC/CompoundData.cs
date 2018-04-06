@@ -33,6 +33,8 @@ namespace SrmHeavyQC
         public bool PassesThreshold { get; private set; }
         public bool PassesNET { get; set; }
 
+        public double ElutionTimeMidpoint => (StartTimeMinutes + StopTimeMinutes) / 2;
+
         private readonly bool isPopulatedFromResultsFile = false;
 
         public CompoundData(TransitionData transition)
