@@ -17,6 +17,7 @@ namespace SrmHeavyQC
             {
                 return 0;
             }
+
             list.Sort();
 
             // Integer division
@@ -24,8 +25,8 @@ namespace SrmHeavyQC
             if (list.Count % 2 == 0)
             {
                 // even number of items, must average the middle 2
-                var int1 = list[mid];
-                var int2 = list[mid + 1];
+                var int1 = list[mid - 1];
+                var int2 = list[mid];
                 return (int1 + int2) / 2.0;
             }
 
