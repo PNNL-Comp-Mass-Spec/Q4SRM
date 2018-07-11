@@ -78,25 +78,18 @@ namespace SrmHeavyQC
 
             foreach (var transition in Transitions)
             {
-                transition.RatioOfCompoundTotalIntensity = transition.IntensitySum / TotalIntensitySum;
+                transition.CalculateStats(TotalIntensitySum, EdgeNETThresholdMinutes);
             }
 
             var maxIntTrans = Transitions.OrderByDescending(x => x.MaxIntensity).First();
             MaxIntensity = maxIntTrans.MaxIntensity;
-            MaxIntensityNet = (maxIntTrans.MaxIntensityTime - maxIntTrans.StartTimeMinutes) / (maxIntTrans.StopTimeMinutes - maxIntTrans.StartTimeMinutes);
-            var edgeNetThreshold = (EdgeNETThresholdMinutes) / (maxIntTrans.StopTimeMinutes - maxIntTrans.StartTimeMinutes);
-            PassesNET = edgeNetThreshold <= MaxIntensityNet && MaxIntensityNet <= 1 - edgeNetThreshold;
+            MaxIntensityNet = maxIntTrans.MaxIntensityNET;
+            PassesNET = maxIntTrans.PassesNET;
             PassesThresholdAndNET = PassesThreshold && PassesNET;
 
-            var fullIntensityList = new List<double>();
-            foreach (var result in Transitions)
-            {
-                fullIntensityList.AddRange(result.Intensities);
-            }
+            MedianIntensity = maxIntTrans.MedianIntensity;
 
-            MedianIntensity = fullIntensityList.Median();
-
-            IntensityRatioMaxVsMedian = MaxIntensity / MedianIntensity;
+            IntensityRatioMaxVsMedian = maxIntTrans.MaxIntensityVsMedian;
             if (double.IsInfinity(IntensityRatioMaxVsMedian) || IntensityRatioMaxVsMedian > MaxIntensity)
             {
                 //System.Console.WriteLine("InfinityEncountered!: {0} MaxInt: {1} Median {2}");
@@ -170,6 +163,7 @@ namespace SrmHeavyQC
                 csv.Configuration.Comment = '#';
                 csv.Configuration.AllowComments = true;
 
+                // TODO: Write the comment (and look for it) after the first line (headers) of the file, for ease-of-use by users (i.e., sorting in Excel)
                 // Write the settings comment
                 csv.WriteComment(" Settings: " + settings.ConvertToTsvComment());
                 // Make sure to finish the line

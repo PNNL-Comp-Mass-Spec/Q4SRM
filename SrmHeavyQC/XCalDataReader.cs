@@ -101,7 +101,7 @@ namespace SrmHeavyQC
                                 if (massRange.Low <= mz && mz <= massRange.High)
                                 {
                                     match.IntensitySum += intensity;
-                                    match.Intensities.Add(intensity);
+                                    match.Intensities.Add(new TransitionData.DataPoint(scan.Key, scanTimes[scan.Key], intensity));
                                     if (intensity > match.MaxIntensity)
                                     {
                                         match.MaxIntensity = intensity;

@@ -77,6 +77,27 @@ namespace SrmHeavyChecker
 
                 CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
                 Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), outputFilePath, options.ImageSaveFormat);
+
+                var imagesDir = Path.ChangeExtension(outputFilePath, null) + "_images";
+                if (!Directory.Exists(imagesDir))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(imagesDir);
+                    }
+                    catch { }
+                }
+
+                if (Directory.Exists(imagesDir))
+                {
+                    foreach (var compound in results)
+                    {
+                        // replace invalid characters with underscores
+                        var name = Path.GetInvalidFileNameChars().Aggregate(compound.CompoundName, (current, c) => current.Replace(c.ToString(), "_"));
+                        var path = Path.Combine(imagesDir, name + ".png");
+                        Plotting.PlotCompound(compound, path);
+                    }
+                }
             }
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
         }

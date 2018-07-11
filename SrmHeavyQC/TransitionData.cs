@@ -23,10 +23,28 @@ namespace SrmHeavyQC
 
         public double MaxIntensity { get; set; }
         public double MaxIntensityTime { get; set; }
+        public double MedianIntensity { get; private set; }
+        public double MaxIntensityVsMedian { get; private set; }
+        public double MaxIntensityNET { get; private set; }
+        public bool PassesNET { get; private set; }
         public double IntensitySum { get; set; }
-        public double RatioOfCompoundTotalIntensity { get; set; }
+        public double RatioOfCompoundTotalIntensity { get; private set; }
 
-        public List<double> Intensities { get; } = new List<double>();
+        public struct DataPoint
+        {
+            public int Scan { get; }
+            public double Time { get; }
+            public double Intensity { get; }
+
+            public DataPoint(int scan, double time, double intensity)
+            {
+                Scan = scan;
+                Time = time;
+                Intensity = intensity;
+            }
+        }
+
+        public List<DataPoint> Intensities { get; } = new List<DataPoint>();
 
         public string CompoundName
         {
@@ -47,6 +65,16 @@ namespace SrmHeavyQC
         }
 
         public bool IsHeavy { get; private set; }
+
+        public void CalculateStats(double compoundTotalIntensitySum, double edgeNetThresholdMinutes)
+        {
+            MedianIntensity = Intensities.Median(x => x.Intensity);
+            MaxIntensityVsMedian = MaxIntensity / MedianIntensity;
+            MaxIntensityNET = (MaxIntensityTime - StartTimeMinutes) / (StopTimeMinutes - StartTimeMinutes);
+            var edgeNetThreshold = (edgeNetThresholdMinutes) / (StopTimeMinutes - StartTimeMinutes);
+            PassesNET = edgeNetThreshold <= MaxIntensityNET && MaxIntensityNET <= 1 - edgeNetThreshold;
+            RatioOfCompoundTotalIntensity = IntensitySum / compoundTotalIntensitySum;
+        }
 
         public override string ToString()
         {
@@ -98,6 +126,10 @@ namespace SrmHeavyQC
                 Map(x => x.ProductMz).Name("m/z");
                 Map(x => x.IntensitySum).Name("totalIntensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 Map(x => x.RatioOfCompoundTotalIntensity).Name("ratio").TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MaxIntensity).Name("Max Intensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MaxIntensityNET).Name("Peak Position (NET)").TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MedianIntensity).Name("Median Intensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MaxIntensityVsMedian).Name("MaxVsMedian Intensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
             }
         }
     }

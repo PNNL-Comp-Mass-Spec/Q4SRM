@@ -58,6 +58,101 @@ namespace SrmHeavyChecker
             }
         }
 
+        public static void PlotCompound(CompoundData result, string filepath, ExportFormat format = ExportFormat.PNG)
+        {
+            if (format == ExportFormat.NoImageExport)
+            {
+                return;
+            }
+
+            var plot = CreateCompoundPlot(result, format);
+
+            switch (format)
+            {
+                case ExportFormat.PDF:
+                    SavePlotToPdf(Path.ChangeExtension(filepath, "pdf"), plot);
+                    break;
+                case ExportFormat.SVG:
+                    SavePlotToSvg(Path.ChangeExtension(filepath, "svg"), plot);
+                    break;
+                case ExportFormat.PNG:
+                    GuaranteeSingleThreadApartment(() => SavePlotToPng(Path.ChangeExtension(filepath, "png"), plot));
+                    break;
+                case ExportFormat.JPEG:
+                    GuaranteeSingleThreadApartment(() => SavePlotToJpg(Path.ChangeExtension(filepath, "jpg"), plot));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public static PlotModel CreateCompoundPlot(CompoundData result, ExportFormat format = ExportFormat.PNG)
+        {
+            if (format == ExportFormat.NoImageExport)
+            {
+                return null;
+            }
+
+            var plot = new OxyPlot.PlotModel()
+            {
+                TitlePadding = 0,
+                Title = result.CompoundName,
+                LegendPosition = LegendPosition.RightTop,
+                LegendFontSize = 20,
+                LegendBorder = OxyColors.Black,
+                LegendBorderThickness = 1,
+                //LegendItemAlignment = HorizontalAlignment.Right,
+                LegendSymbolPlacement = LegendSymbolPlacement.Right,
+            };
+
+            var xMax = result.Transitions.Max(x => x.StopTimeMinutes);
+            var xMin = result.Transitions.Min(x => x.StartTimeMinutes); ;
+            var yMax = result.Transitions.Max(x => x.MaxIntensity);
+
+            var yAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Title = "Intensity",
+                StringFormat = "#e00",
+                FontSize = 20,
+                Minimum = 0,
+                AbsoluteMinimum = 0,
+            };
+
+            var xAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = "Time (min)",
+                FontSize = 20,
+                Minimum = xMin,
+                AbsoluteMinimum = xMin,
+                Maximum = xMax,
+                AbsoluteMaximum = xMax,
+            };
+
+            plot.Axes.Add(yAxis);
+            plot.Axes.Add(xAxis);
+
+            var trackerFormatString = $"Scan: {{{nameof(TransitionData.DataPoint.Scan)}}}\nTime: {{{nameof(TransitionData.DataPoint.Time)}}}\nIntensity: {{{nameof(TransitionData.DataPoint.Intensity)}}}";
+            var pointMapper = new Func<object, DataPoint>(x => new DataPoint(((TransitionData.DataPoint)x).Time, ((TransitionData.DataPoint)x).Intensity));
+
+            foreach (var transition in result.Transitions)
+            {
+                var series = new LineSeries()
+                {
+                    Title = $"{transition.ProductMz:F2}",
+                    MarkerType = MarkerType.None,
+                    ItemsSource = transition.Intensities,
+                    Mapping = pointMapper,
+                    TrackerFormatString = trackerFormatString,
+                };
+
+                plot.Series.Add(series);
+            }
+
+            return plot;
+        }
+
         public static PlotModel CreatePlot(List<CompoundData> results, string datasetName, ExportFormat format = ExportFormat.PNG)
         {
             if (format == ExportFormat.NoImageExport)
