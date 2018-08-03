@@ -26,7 +26,8 @@ namespace SrmHeavyQC
 
         public static string ConvertToTsvComment(this ISettingsData settings)
         {
-            var formatted = $"DefaultThreshold: {settings.DefaultIntensityThreshold:0.###}; NET time threshold (min): {settings.EdgeNETThresholdMinutes:0.###}";
+            var formatted = $"DefaultIntensityThreshold: {settings.DefaultIntensityThreshold:0.###}; NET time threshold (min): {settings.EdgeNETThresholdMinutes:0.###}";
+            formatted += $"; Elution Concurrence threshold (min): {settings.ElutionConcurrenceThresholdMinutes:0.###}; S/N Heuristic threshold: {settings.SignalToNoiseHeuristicThreshold:0.###}";
 
             if (!string.IsNullOrWhiteSpace(settings.CompoundThresholdFilePath))
             {
@@ -51,7 +52,7 @@ namespace SrmHeavyQC
             return CompoundThresholdData.ConvertToSearchMap(thresholds);
         }
 
-        private static Regex TsvCommentSettingsRegex = new Regex(@"DefaultThreshold: (?<defaultThreshold>\d+\.?\d*)(; NET time threshold \(min\): (?<netTimeThreshold>\d+\.?\d*))?(; CompoundThresholdsFile: (?<filepath>.*); SHA1Hash (?<fileHash>.*))?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex TsvCommentSettingsRegex = new Regex(@"DefaultIntensityThreshold: (?<defaultThreshold>\d+\.?\d*); NET time threshold \(min\): (?<netTimeThreshold>\d+\.?\d*); Elution Concurrence threshold \(min\): (?<elutionConcurrenceThreshold>\d+\.?\d*); S/N Heuristic threshold: (?<snHeuristicThreshold>\d+\.?\d*)(; CompoundThresholdsFile: (?<filepath>.*); SHA1Hash (?<fileHash>.*))?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static void PopulateFromTsvComment(this ISettingsData settings, string tsvCommentLine)
         {
@@ -69,6 +70,18 @@ namespace SrmHeavyQC
                 settings.EdgeNETThresholdMinutes = double.Parse(netTimeThreshold);
             }
 
+            var elutionConcurrenceThreshold = match.Groups["elutionConcurrenceThreshold"].Value;
+            if (!string.IsNullOrWhiteSpace(elutionConcurrenceThreshold))
+            {
+                settings.ElutionConcurrenceThresholdMinutes = double.Parse(elutionConcurrenceThreshold);
+            }
+
+            var snHeuristicThreshold = match.Groups["snHeuristicThreshold"].Value;
+            if (!string.IsNullOrWhiteSpace(snHeuristicThreshold))
+            {
+                settings.SignalToNoiseHeuristicThreshold = double.Parse(snHeuristicThreshold);
+            }
+
             // if not match, the value is string.Empty. (also .Success will be false)
             settings.CompoundThresholdFilePath = match.Groups["filepath"].Value.Trim().Trim('"', '\'');
             settings.CompoundThresholdFileSha1Hash = match.Groups["fileHash"].Value.Trim();
@@ -81,7 +94,10 @@ namespace SrmHeavyQC
                 return false;
             }
 
-            if (!settings1.DefaultIntensityThreshold.Equals(settings2.DefaultIntensityThreshold))
+            if (!settings1.DefaultIntensityThreshold.Equals(settings2.DefaultIntensityThreshold) ||
+                !settings1.EdgeNETThresholdMinutes.Equals(settings2.EdgeNETThresholdMinutes) ||
+                !settings1.ElutionConcurrenceThresholdMinutes.Equals(settings2.ElutionConcurrenceThresholdMinutes) ||
+                !settings1.SignalToNoiseHeuristicThreshold.Equals(settings2.SignalToNoiseHeuristicThreshold))
             {
                 return false;
             }

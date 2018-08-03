@@ -141,6 +141,12 @@ namespace SrmHeavyQC
             using (var streamReader = new StreamReader(new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
             {
                 var line = streamReader.ReadLine();
+                if (line != null && !line.StartsWith("#"))
+                {
+                    // Later versions: comment line is the second line (after the headers)
+                    line = streamReader.ReadLine();
+                }
+
                 if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("#"))
                 {
                     return false;
@@ -172,12 +178,16 @@ namespace SrmHeavyQC
                 csv.Configuration.Comment = '#';
                 csv.Configuration.AllowComments = true;
 
-                // TODO: Write the comment (and look for it) after the first line (headers) of the file, for ease-of-use by users (i.e., sorting in Excel)
+                // write the header first
+                csv.WriteHeader<CompoundData>();
+                csv.NextRecord();
+
                 // Write the settings comment
                 csv.WriteComment(" Settings: " + settings.ConvertToTsvComment());
                 // Make sure to finish the line
                 csv.NextRecord();
-                // Write everything else, including the headers.
+
+                // Write everything else (which shouldn't include the headers).
                 csv.WriteRecords(results);
             }
         }
