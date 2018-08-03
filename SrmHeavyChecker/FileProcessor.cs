@@ -77,6 +77,9 @@ namespace SrmHeavyChecker
 
                 CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
                 Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), outputFilePath, options.ImageSaveFormat);
+                var pdfPath = Path.ChangeExtension(outputFilePath, "pdf");
+                var pdfWriter = new PdfWriter(Path.GetFileNameWithoutExtension(rawFilePath), rawFilePath, pdfPath);
+                pdfWriter.WritePdf(results, options);
 
                 /*/
                 var imagesDir = Path.ChangeExtension(outputFilePath, null) + "_images";

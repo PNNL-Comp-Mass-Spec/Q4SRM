@@ -58,6 +58,12 @@ namespace SrmHeavyChecker
             }
         }
 
+        public static BitmapSource ConvertToBitmapImage(PlotModel plot, int width, int height, int resolution = 96)
+        {
+            var scale = resolution / 96.0;
+            return OxyPlot.Wpf.PngExporter.ExportToBitmap(plot, (int) (width * scale), (int) (height * scale), OxyColors.White, resolution);
+        }
+
         public static void PlotCompound(CompoundData result, string filepath, ExportFormat format = ExportFormat.PNG)
         {
             if (format == ExportFormat.NoImageExport)
