@@ -222,8 +222,8 @@ namespace SrmHeavyQC
                 Map(x => x.PassesAllThresholds).Name("Passes All Checks").Index(index++);
                 Map(x => x.PassesIntensity).Name("Passes Intensity").Index(index++);
                 Map(x => x.PassesNET).Name("Passes NET").Index(index++);
-                Map(x => x.PassesNET).Name("Passes Elution Concurrence").Index(index++);
-                Map(x => x.PassesNET).Name("Passes S/N Heuristic").Index(index++);
+                Map(x => x.PassesElutionConcurrence).Name("Passes Elution Concurrence").Index(index++);
+                Map(x => x.PassesSignalToNoiseHeuristic).Name("Passes S/N Heuristic").Index(index++);
                 //Map(x => x.MaxIntensity).Name("IntensityMax").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 //Map(x => x.MaxIntensityNet).Name("IntensityMaxNET").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 //Map(x => x.IntensityRatioMaxVsMedian).Name("IntensityRatioMaxVsMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
