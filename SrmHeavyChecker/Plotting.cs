@@ -160,11 +160,12 @@ namespace SrmHeavyChecker
                 return null;
             }
 
-            var passed = results.Where(x => x.PassesThreshold && x.PassesNET).ToList();
-            var edge = results.Where(x => x.PassesThreshold && !x.PassesNET).ToList();
-            var failed = results.Where(x => !x.PassesThreshold).ToList();
+            var passed = results.Where(x => x.PassesIntensity && x.PassesNET).ToList();
+            var edge = results.Where(x => x.PassesIntensity && !x.PassesNET).ToList();
+            var failed = results.Where(x => !x.PassesIntensity).ToList();
 
-            var plot = CreatePlotFromData(datasetName, passed, edge, failed, "Passed", "NET Edge", "Failed", format);
+            // TODO: Add "Peak Concurrence", "S/N Heuristic"
+            var plot = CreatePlotFromData(datasetName, passed, edge, failed, "Passed", "Elution Edge", "Low Intensity", format);
 
             return plot;
         }

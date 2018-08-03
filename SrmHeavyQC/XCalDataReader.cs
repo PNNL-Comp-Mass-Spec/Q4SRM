@@ -129,11 +129,17 @@ namespace SrmHeavyQC
             {
                 if (!combined.TryGetValue(item.CompoundName, out var group))
                 {
-                    group = new CompoundData(item) { Threshold = settings.DefaultThreshold, EdgeNETThresholdMinutes = settings.EdgeNETThresholdMinutes };
+                    group = new CompoundData(item)
+                    {
+                        IntensityThreshold = settings.DefaultIntensityThreshold,
+                        EdgeNETThresholdMinutes = settings.EdgeNETThresholdMinutes,
+                        ElutionConcurrenceThresholdMinutes = settings.ElutionConcurrenceThresholdMinutes,
+                        SignalToNoiseHeuristicThreshold = settings.SignalToNoiseHeuristicThreshold
+                    };
                     // Look for and handle custom thresholds
                     if (compoundThresholds.TryGetValue(item.CompoundName, out var cThreshold))
                     {
-                        group.Threshold = cThreshold.Threshold;
+                        group.IntensityThreshold = cThreshold.Threshold;
                     }
                     combined.Add(group.CompoundName, group);
                 }

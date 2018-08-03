@@ -18,11 +18,17 @@ namespace SrmHeavyChecker
         [Option("filter", Required = false, HelpText = "If raw file path is a folder, a file filter string (supports '*' wildcard)")]
         public string FileFilter { get; set; }
 
+        [Option("t", Required = false, HelpText = "Peak area threshold for a compound to be considered \"passing\"", Min = 0)]
+        public double DefaultIntensityThreshold { get; set; }
+
         [Option("m", Required = false, HelpText = "Time (in minutes) that a peak must be away from the edge of the target window for it to be considered \"passing\"", Min = 0)]
         public double EdgeNETThresholdMinutes { get; set; }
 
-        [Option("t", Required = false, HelpText = "Peak area threshold for a compound to be considered \"passing\"", Min = 0)]
-        public double DefaultThreshold { get; set; }
+        [Option("ec", Required = false, HelpText = "Threshold (in minutes) for elution concurrence of the transition peaks for the same compound; smaller is stricter.")]
+        public double ElutionConcurrenceThresholdMinutes { get; set; }
+
+        [Option("sn", Required = false, HelpText = "Threshold for the Signal-to-Noise heuristic; larger is stricter; value is calculated as max intensity / median intensity")]
+        public double SignalToNoiseHeuristicThreshold { get; set; }
 
         [Option("tpc", Required = false, HelpText = "A TSV file with compound and threshold columns, for custom thresholds for the specified compounds")]
         public string CompoundThresholdFilePath { get; set; }
@@ -60,8 +66,10 @@ namespace SrmHeavyChecker
         {
             RawFilePath = "";
             CompoundThresholdFilePath = "";
-            DefaultThreshold = 10000;
+            DefaultIntensityThreshold = 10000;
             EdgeNETThresholdMinutes = 0.5;
+            ElutionConcurrenceThresholdMinutes = 0.1;
+            SignalToNoiseHeuristicThreshold = 10;
             FilesToProcessList = new List<string>();
             Recurse = false;
             FileFilter = "*.raw";

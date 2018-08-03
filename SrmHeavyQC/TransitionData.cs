@@ -127,9 +127,9 @@ namespace SrmHeavyQC
                 Map(x => x.IntensitySum).Name("totalIntensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 Map(x => x.RatioOfCompoundTotalIntensity).Name("ratio").TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 Map(x => x.MaxIntensity).Name("Max Intensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
-                Map(x => x.MaxIntensityNET).Name("Peak Position (NET)").TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 Map(x => x.MedianIntensity).Name("Median Intensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
-                Map(x => x.MaxIntensityVsMedian).Name("MaxVsMedian Intensity").TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MaxIntensityNET).Name("Peak Position (NET)").TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.MaxIntensityVsMedian).Name("S/N Heuristic").TypeConverter<DecimalLimitingDoubleTypeConverter>();
             }
         }
     }

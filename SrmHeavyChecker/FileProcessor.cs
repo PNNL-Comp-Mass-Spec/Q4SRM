@@ -78,6 +78,7 @@ namespace SrmHeavyChecker
                 CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
                 Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), outputFilePath, options.ImageSaveFormat);
 
+                /*/
                 var imagesDir = Path.ChangeExtension(outputFilePath, null) + "_images";
                 if (!Directory.Exists(imagesDir))
                 {
@@ -94,10 +95,14 @@ namespace SrmHeavyChecker
                     {
                         // replace invalid characters with underscores
                         var name = Path.GetInvalidFileNameChars().Aggregate(compound.CompoundName, (current, c) => current.Replace(c.ToString(), "_"));
-                        var path = Path.Combine(imagesDir, name + ".png");
+                        var namePrefix = (compound.PassesAllThresholds
+                                             ? "P"
+                                             : (compound.PassesThreshold ? "" : "I") + (compound.PassesNET ? "" : "N")) + "_";
+                        var path = Path.Combine(imagesDir, namePrefix + name + ".png");
                         Plotting.PlotCompound(compound, path);
                     }
                 }
+                /**/
             }
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
         }
@@ -133,7 +138,7 @@ namespace SrmHeavyChecker
             Console.WriteLine("Creating per-compound thresholds file...");
 
             // Group the passing results
-            var grouped = fullResults.Where(x => x.PassesThreshold).GroupBy(x => x.CompoundName);
+            var grouped = fullResults.Where(x => x.PassesIntensity).GroupBy(x => x.CompoundName);
             var thresholds = new List<CompoundThresholdData>();
             foreach (var group in grouped)
             {

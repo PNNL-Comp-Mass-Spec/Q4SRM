@@ -26,7 +26,7 @@ namespace SrmHeavyQC
 
         public static string ConvertToTsvComment(this ISettingsData settings)
         {
-            var formatted = $"DefaultThreshold: {settings.DefaultThreshold:0.###}; NET time threshold (min): {settings.EdgeNETThresholdMinutes:0.###}";
+            var formatted = $"DefaultThreshold: {settings.DefaultIntensityThreshold:0.###}; NET time threshold (min): {settings.EdgeNETThresholdMinutes:0.###}";
 
             if (!string.IsNullOrWhiteSpace(settings.CompoundThresholdFilePath))
             {
@@ -60,7 +60,7 @@ namespace SrmHeavyQC
             var defaultThreshold = match.Groups["defaultThreshold"].Value;
             if (!string.IsNullOrWhiteSpace(defaultThreshold))
             {
-                settings.DefaultThreshold = double.Parse(defaultThreshold);
+                settings.DefaultIntensityThreshold = double.Parse(defaultThreshold);
             }
 
             var netTimeThreshold = match.Groups["netTimeThreshold"].Value;
@@ -81,7 +81,7 @@ namespace SrmHeavyQC
                 return false;
             }
 
-            if (!settings1.DefaultThreshold.Equals(settings2.DefaultThreshold))
+            if (!settings1.DefaultIntensityThreshold.Equals(settings2.DefaultIntensityThreshold))
             {
                 return false;
             }

@@ -7,7 +7,7 @@
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance {x:Type local:DataProcessingViewModel}, IsDesignTimeCreatable=True}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="600" d:DesignWidth="800">
     <UserControl.Resources>
         <Style x:Key="GridSplitterPreviewStyle">
             <Setter Property="Control.Template">
@@ -100,12 +100,14 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="1*" MinWidth="70" />
-                        <ColumnDefinition Width="3*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" MinWidth="90" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" MinWidth="60" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Max Threads" />
                     <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Margin="3" MinWidth="70" Minimum="1" Maximum="{Binding Options.MaxThreadsUsable}" Value="{Binding Options.MaxThreads}" />
@@ -117,11 +119,33 @@
                         <ComboBox DockPanel.Dock="Right" Margin="3" MinWidth="100" ItemsSource="{Binding ExportFormats}" SelectedItem="{Binding Options.ImageSaveFormat}" />
                         <TextBlock DockPanel.Dock="Right" Margin="3" VerticalAlignment="Center" Text="Image save format" />
                     </DockPanel>
-                    <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum summed intensity to pass" />
-                    <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Margin="3" Minimum="1" Value="{Binding Options.DefaultThreshold}" />
-                    <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Minimum NET distance from edge" />
-                    <xctk:DoubleUpDown Grid.Row="4" Grid.Column="1" Margin="3" Minimum="0" Increment="0.1" FormatString="F2" Value="{Binding Options.EdgeNETThresholdMinutes}" />
-                    <TextBlock Grid.Row="4" Grid.Column="2" Margin="3" VerticalAlignment="Center" Text="minutes from elution window edge" />
+                    <GroupBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Header="Thresholds">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" MinWidth="90" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Compound: Minimum summed intensity" />
+                            <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Margin="3" Minimum="1" Value="{Binding Options.DefaultIntensityThreshold}" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Margin="3" VerticalAlignment="Center" Text="(higher is stricter)" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Compound: Elution concurrence window" />
+                            <xctk:DoubleUpDown Grid.Row="1" Grid.Column="1" Margin="3" Minimum="0" Increment="0.1" FormatString="F2" Value="{Binding Options.ElutionConcurrenceThresholdMinutes}" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Margin="3" VerticalAlignment="Center" Text="minutes from the earliest to the latest peak (lower is stricter)" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Transition: Minimum peak distance from edge" />
+                            <xctk:DoubleUpDown Grid.Row="2" Grid.Column="1" Margin="3" Minimum="0" Increment="0.1" FormatString="F2" Value="{Binding Options.EdgeNETThresholdMinutes}" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Margin="3" VerticalAlignment="Center" Text="minutes from elution window edge (lower is stricter)" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" VerticalAlignment="Center" Text="Transition: Signal/Noise heuristic threshold" />
+                            <xctk:DoubleUpDown Grid.Row="3" Grid.Column="1" Margin="3" Minimum="0" Increment="1.0" FormatString="F2" Value="{Binding Options.SignalToNoiseHeuristicThreshold}" />
+                            <TextBlock Grid.Row="3" Grid.Column="2" Margin="3" VerticalAlignment="Center" Text="max intensity / median intensity (higher is stricter)" />
+                        </Grid>
+                    </GroupBox>
                     <CheckBox Grid.Row="5" Grid.Column="0" Margin="3" VerticalAlignment="Center" Content="Use per-compound thresholds" IsChecked="{Binding Options.UseCompoundThresholdsFile}" />
                     <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="3" Text="{Binding Options.CompoundThresholdFilePath}" />
                     <Button Grid.Row="5" Grid.Column="3" Margin="3" Content="Browse" Command="{Binding BrowseForThresholdsFileCommand}" />

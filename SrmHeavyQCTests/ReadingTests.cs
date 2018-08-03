@@ -39,7 +39,7 @@ namespace SrmHeavyQCTests
             {
                 var settings = new SettingsData()
                 {
-                    DefaultThreshold = 10000
+                    DefaultIntensityThreshold = 10000
                 };
 
                 var results = reader.ReadRawData(settings);

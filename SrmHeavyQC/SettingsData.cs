@@ -2,9 +2,13 @@
 {
     internal class SettingsData : ISettingsData
     {
-        public double DefaultThreshold { get; set; }
+        public double DefaultIntensityThreshold { get; set; }
 
         public double EdgeNETThresholdMinutes { get; set; }
+
+        public double ElutionConcurrenceThresholdMinutes { get; set; }
+
+        public double SignalToNoiseHeuristicThreshold { get; set; }
 
         public string CompoundThresholdFilePath { get; set; }
 

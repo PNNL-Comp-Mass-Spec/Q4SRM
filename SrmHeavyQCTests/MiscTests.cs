@@ -15,7 +15,7 @@ namespace SrmHeavyQCTests
             var testComment = @"# DefaultThreshold: 10000; CompoundThresholdsFile: ""F:\Temp\RandomFile.tsv""; SHA1Hash 123456789abcdef";
             var settings = new SettingsData();
             settings.PopulateFromTsvComment(testComment);
-            Console.WriteLine("DefaultThreshold: {0}", settings.DefaultThreshold);
+            Console.WriteLine("DefaultThreshold: {0}", settings.DefaultIntensityThreshold);
             Console.WriteLine("CompoundThresholdFilePath: {0}", settings.CompoundThresholdFilePath);
             Console.WriteLine("CompoundThresholdFileSha1Hash: {0}", settings.CompoundThresholdFileSha1Hash);
         }
@@ -28,7 +28,7 @@ namespace SrmHeavyQCTests
             var sha1 = ""; // @"123456789abcdef";
             var settings = new SettingsData()
             {
-                DefaultThreshold = 10000,
+                DefaultIntensityThreshold = 10000,
                 CompoundThresholdFilePath = filePath,
                 CompoundThresholdFileSha1Hash = sha1,
             };
@@ -37,7 +37,7 @@ namespace SrmHeavyQCTests
             var parsedSettings = new SettingsData();
             parsedSettings.PopulateFromTsvComment(asComment);
 
-            Assert.AreEqual(defaultThreshold, parsedSettings.DefaultThreshold);
+            Assert.AreEqual(defaultThreshold, parsedSettings.DefaultIntensityThreshold);
             Assert.AreEqual(filePath, parsedSettings.CompoundThresholdFilePath);
             Assert.AreEqual(sha1, parsedSettings.CompoundThresholdFileSha1Hash);
             Assert.True(settings.SettingsEquals(parsedSettings));

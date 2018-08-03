@@ -13,6 +13,8 @@ namespace SrmHeavyChecker
         private string rawFilePath;
         private double defaultThreshold;
         private double edgeNETThresholdMinutes;
+        private double elutionConcurrenceThresholdMinutes;
+        private double signalToNoiseHeuristicThreshold;
         private string compoundThresholdFilePath;
         private string outputFolder;
         private int maxThreads;
@@ -31,7 +33,7 @@ namespace SrmHeavyChecker
             set { this.RaiseAndSetIfChanged(ref rawFilePath, value); }
         }
 
-        public double DefaultThreshold
+        public double DefaultIntensityThreshold
         {
             get { return defaultThreshold; }
             set { this.RaiseAndSetIfChanged(ref defaultThreshold, value); }
@@ -41,6 +43,18 @@ namespace SrmHeavyChecker
         {
             get { return edgeNETThresholdMinutes; }
             set { this.RaiseAndSetIfChanged(ref edgeNETThresholdMinutes, value); }
+        }
+
+        public double ElutionConcurrenceThresholdMinutes
+        {
+            get => elutionConcurrenceThresholdMinutes;
+            set { this.RaiseAndSetIfChanged(ref elutionConcurrenceThresholdMinutes, value); }
+        }
+
+        public double SignalToNoiseHeuristicThreshold
+        {
+            get => signalToNoiseHeuristicThreshold;
+            set { this.RaiseAndSetIfChanged(ref signalToNoiseHeuristicThreshold, value); }
         }
 
         public string CompoundThresholdFilePath
@@ -128,8 +142,10 @@ namespace SrmHeavyChecker
         {
             RawFilePath = "";
             CompoundThresholdFilePath = "";
-            DefaultThreshold = 10000;
+            DefaultIntensityThreshold = 10000;
             EdgeNETThresholdMinutes = 0.5;
+            ElutionConcurrenceThresholdMinutes = 0.1;
+            SignalToNoiseHeuristicThreshold = 10;
             MaxThreads = SystemInfo.GetCoreCount();
             UseOutputFolder = false;
             UseCompoundThresholdsFile = false;

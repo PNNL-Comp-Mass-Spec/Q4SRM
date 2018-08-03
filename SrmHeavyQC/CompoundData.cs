@@ -26,12 +26,16 @@ namespace SrmHeavyQC
         /// </summary>
         public double MaxIntensityNet { get; private set; }
 
-        public double Threshold { get; set; }
+        public double IntensityThreshold { get; set; }
         public double EdgeNETThresholdMinutes { get; set; }
+        public double ElutionConcurrenceThresholdMinutes { get; set; }
+        public double SignalToNoiseHeuristicThreshold { get; set; }
 
-        public bool PassesThresholdAndNET { get; private set; }
-        public bool PassesThreshold { get; private set; }
-        public bool PassesNET { get; set; }
+        public bool PassesAllThresholds { get; private set; }
+        public bool PassesIntensity { get; private set; }
+        public bool PassesNET { get; private set; }
+        public bool PassesElutionConcurrence { get; private set; }
+        public bool PassesSignalToNoiseHeuristic { get; private set; }
 
         public double ElutionTimeMidpoint => (StartTimeMinutes + StopTimeMinutes) / 2;
 
@@ -74,7 +78,7 @@ namespace SrmHeavyQC
                 return;
             }
 
-            PassesThreshold = TotalIntensitySum >= Threshold;
+            PassesIntensity = TotalIntensitySum >= IntensityThreshold;
 
             foreach (var transition in Transitions)
             {
@@ -85,7 +89,12 @@ namespace SrmHeavyQC
             MaxIntensity = maxIntTrans.MaxIntensity;
             MaxIntensityNet = maxIntTrans.MaxIntensityNET;
             PassesNET = maxIntTrans.PassesNET;
-            PassesThresholdAndNET = PassesThreshold && PassesNET;
+
+            var minTimePeak = Transitions.OrderBy(x => x.MaxIntensityTime).First();
+            var maxTimePeak = Transitions.OrderBy(x => x.MaxIntensityTime).Last();
+            PassesElutionConcurrence = maxTimePeak.MaxIntensityTime - minTimePeak.MaxIntensityTime <= ElutionConcurrenceThresholdMinutes;
+            PassesSignalToNoiseHeuristic = Transitions.All(x => x.MaxIntensityVsMedian >= SignalToNoiseHeuristicThreshold);
+            PassesAllThresholds = PassesIntensity && PassesNET && PassesElutionConcurrence && PassesSignalToNoiseHeuristic;
 
             MedianIntensity = maxIntTrans.MedianIntensity;
 
@@ -210,13 +219,15 @@ namespace SrmHeavyQC
                 Map(x => x.StartTimeMinutes).Name("Start Time (min)").Index(index++);
                 Map(x => x.StopTimeMinutes).Name("Stop Time (min)").Index(index++);
                 Map(x => x.TotalIntensitySum).Name("TotalIntensity").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
-                Map(x => x.PassesThresholdAndNET).Name("Passes All Checks").Index(index++);
-                Map(x => x.PassesThreshold).Name("Passes Threshold").Index(index++);
+                Map(x => x.PassesAllThresholds).Name("Passes All Checks").Index(index++);
+                Map(x => x.PassesIntensity).Name("Passes Intensity").Index(index++);
                 Map(x => x.PassesNET).Name("Passes NET").Index(index++);
-                Map(x => x.MaxIntensity).Name("IntensityMax").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
-                Map(x => x.MaxIntensityNet).Name("IntensityMaxNET").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
-                Map(x => x.IntensityRatioMaxVsMedian).Name("IntensityRatioMaxVsMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
-                Map(x => x.MedianIntensity).Name("IntensityMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                Map(x => x.PassesNET).Name("Passes Elution Concurrence").Index(index++);
+                Map(x => x.PassesNET).Name("Passes S/N Heuristic").Index(index++);
+                //Map(x => x.MaxIntensity).Name("IntensityMax").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                //Map(x => x.MaxIntensityNet).Name("IntensityMaxNET").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                //Map(x => x.IntensityRatioMaxVsMedian).Name("IntensityRatioMaxVsMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
+                //Map(x => x.MedianIntensity).Name("IntensityMedian").Index(index++).TypeConverter<DecimalLimitingDoubleTypeConverter>();
                 /*/
                 for (var i = 0; i < maxTransitionCount; i++)
                 {
