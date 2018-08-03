@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using CsvHelper;
@@ -69,7 +70,9 @@ namespace SrmHeavyQC
         public void CalculateStats(double compoundTotalIntensitySum, double edgeNetThresholdMinutes)
         {
             MedianIntensity = Intensities.Median(x => x.Intensity);
-            MaxIntensityVsMedian = MaxIntensity / MedianIntensity;
+            // Avoid divide by zero/infinity
+            MaxIntensityVsMedian = MaxIntensity / Math.Max(MedianIntensity, 1);
+
             MaxIntensityNET = (MaxIntensityTime - StartTimeMinutes) / (StopTimeMinutes - StartTimeMinutes);
             var edgeNetThreshold = (edgeNetThresholdMinutes) / (StopTimeMinutes - StartTimeMinutes);
             PassesNET = edgeNetThreshold <= MaxIntensityNET && MaxIntensityNET <= 1 - edgeNetThreshold;
