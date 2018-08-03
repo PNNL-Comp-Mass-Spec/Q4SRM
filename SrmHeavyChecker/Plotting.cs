@@ -166,12 +166,14 @@ namespace SrmHeavyChecker
                 return null;
             }
 
-            var passed = results.Where(x => x.PassesIntensity && x.PassesNET).ToList();
-            var edge = results.Where(x => x.PassesIntensity && !x.PassesNET).ToList();
-            var failed = results.Where(x => !x.PassesIntensity).ToList();
+            var passed = new SeriesData(results.Where(x => x.PassesIntensity && x.PassesNET).ToList(), "Passed", OxyColors.Green, MarkerType.Circle);
+            var edge = new SeriesData(results.Where(x => x.PassesIntensity && !x.PassesNET).ToList(), "Elution Edge", OxyColors.Orange, MarkerType.Diamond);
+            var failed = new SeriesData(results.Where(x => !x.PassesIntensity).ToList(), "Low Intensity", OxyColors.Red, MarkerType.Triangle);
+
+            var items = new List<SeriesData>() {passed, edge, failed};
 
             // TODO: Add "Peak Concurrence", "S/N Heuristic"
-            var plot = CreatePlotFromData(datasetName, passed, edge, failed, "Passed", "Elution Edge", "Low Intensity", format);
+            var plot = CreatePlotFromData(datasetName, items, format);
 
             return plot;
         }
@@ -249,7 +251,25 @@ namespace SrmHeavyChecker
             }
         }
 
-        private static PlotModel CreatePlotFromData(string title, List<CompoundData> greenPoints, List<CompoundData> orangePoints, List<CompoundData> redPoints, string greenTitle, string orangeTitle, string redTitle, ExportFormat exFormat)
+        private class SeriesData
+        {
+            public List<CompoundData> Points { get; }
+            public string Title { get; }
+            public TitleSpaceFormattingCombined TitleFormatted { get; }
+            public MarkerType PointMarker { get; }
+            public OxyColor PointColor { get; }
+
+            public SeriesData(List<CompoundData> points, string title, OxyColor pointColor, MarkerType pointMarker)
+            {
+                Points = points;
+                Title = title;
+                TitleFormatted = new TitleSpaceFormattingCombined(title, $"({points.Count})");
+                PointColor = pointColor;
+                PointMarker = pointMarker;
+            }
+        }
+
+        private static PlotModel CreatePlotFromData(string title, List<SeriesData> data, ExportFormat exFormat)
         {
             var plot = new OxyPlot.PlotModel()
             {
@@ -263,8 +283,7 @@ namespace SrmHeavyChecker
                 LegendSymbolPlacement = LegendSymbolPlacement.Right,
             };
 
-            var allPoints = redPoints.ToList();
-            allPoints.AddRange(greenPoints);
+            var allPoints = data.SelectMany(x => x.Points).ToList();
             var xMax = allPoints.Max(x => x.ElutionTimeMidpoint);
             var xMin = allPoints.Min(x => x.ElutionTimeMidpoint);
             var yMax = allPoints.Max(x => x.TotalIntensitySum);
@@ -286,14 +305,6 @@ namespace SrmHeavyChecker
                 typeface = new Typeface(font);
             }
 
-            //SetTextToEqualWidth(greenTitle, redTitle, out var greenTitleFmtted, out var redTitleFmtted, plot.LegendFontSize, false, true, typeface);
-            //SetTextToEqualWidth($"({greenPoints.Count})", $"({redPoints.Count})", out var greenCountFmtted, out var redCountFmtted, plot.LegendFontSize, true, true, typeface);
-            //var spaceGap = new string('\u00A0', 2);
-
-            string greenFmtted;
-            string orangeFmtted;
-            string redFmtted;
-
             switch (exFormat)
             {
                 case ExportFormat.PDF:
@@ -301,53 +312,19 @@ namespace SrmHeavyChecker
                     // These don't use Windows WPF rendering, so we can't determine text width correctly for the output.
                     goto default;
                 case ExportFormat.PNG:
-                    SetCombinedTextToEqualWidth(greenTitle, $"({greenPoints.Count})", orangeTitle, $"({orangePoints.Count})", redTitle, $"({redPoints.Count})", 2, out greenFmtted, out orangeFmtted, out redFmtted, plot.LegendFontSize, typeface);
+                case ExportFormat.JPEG:
+                    SetCombinedTextToEqualWidth(data.Select(x => x.TitleFormatted).ToList(), 2, plot.LegendFontSize, typeface);
                     break;
                 default:
-                    greenFmtted = $"{greenTitle} {"(" + greenPoints.Count + ")",6}";
-                    orangeFmtted = $"{orangeTitle} {"(" + orangePoints.Count + ")",6}";
-                    redFmtted = $"{redTitle} {"(" + redPoints.Count + ")",6}";
+                    foreach (var item in data)
+                    {
+                        item.TitleFormatted.TitleFormatted = $"{item.Title} {"(" + item.Points.Count + ")",6}";
+                    }
                     break;
             }
 
             var trackerFormatString = $"Compound: {{{nameof(CompoundData.CompoundName)}}}\nStart time: {{{nameof(CompoundData.StartTimeMinutes)}}}\nStop Time: {{{nameof(CompoundData.StopTimeMinutes)}}}\nTotal Abundance: {{{nameof(CompoundData.TotalIntensitySum)}}}\nMax Intensity: {{{nameof(CompoundData.MaxIntensity)}}}\nMax Intensity NET: {{{nameof(CompoundData.MaxIntensityNet)}}}";
-            var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((CompoundData) x).ElutionTimeMidpoint, ((CompoundData) x).TotalIntensitySum));
-
-            var greenSeries = new ScatterSeries
-            {
-                Title = greenFmtted,
-                MarkerType = MarkerType.Circle,
-                MarkerStrokeThickness = seriesPointStrokeThickness,
-                MarkerSize = seriesPointMarkerSize,
-                MarkerFill = OxyColors.Green,
-                ItemsSource = greenPoints,
-                Mapping = pointMapper,
-                TrackerFormatString = trackerFormatString,
-            };
-
-            var orangeSeries = new ScatterSeries
-            {
-                Title = orangeFmtted,
-                MarkerType = MarkerType.Diamond,
-                MarkerStrokeThickness = seriesPointStrokeThickness,
-                MarkerSize = seriesPointMarkerSize,
-                MarkerFill = OxyColors.Orange,
-                ItemsSource = orangePoints,
-                Mapping = pointMapper,
-                TrackerFormatString = trackerFormatString,
-            };
-
-            var redSeries = new ScatterSeries
-            {
-                Title = redFmtted,
-                MarkerType = MarkerType.Triangle,
-                MarkerStrokeThickness = seriesPointStrokeThickness,
-                MarkerSize = seriesPointMarkerSize,
-                MarkerFill = OxyColors.Red,
-                ItemsSource = redPoints,
-                Mapping = pointMapper,
-                TrackerFormatString = trackerFormatString,
-            };
+            var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((CompoundData)x).ElutionTimeMidpoint, ((CompoundData)x).TotalIntensitySum));
 
             var yAxisMax = yMax * 20; // seems big, but it is a logarithmic scale
             var yAxisMin = yMin / 10.0; // 1 step down on the log scale
@@ -377,205 +354,175 @@ namespace SrmHeavyChecker
                 AbsoluteMaximum = xAxisMax,
             };
 
-            //var txtX = xMin;
-            //var txtY = yMax + Math.Pow(10, Math.Log10(yMax));
-            //var lenDiff = Math.Abs(greenTitle.Length - redTitle.Length) + 5;
-            //var fmtString = $"{{0}} {{1,{lenDiff}}}\r\n{{2}} {{3,{lenDiff}}}";
-            //var annotation = new TextAnnotation
-            //{
-            //    TextPosition = new DataPoint(txtX, txtY),
-            //    //Text = $"{greenCountLegend}: {greenPoints.Count}\r\n{redCountLegend}: {redPoints.Count}",
-            //    Text = string.Format(fmtString, greenTitle + ":", greenPoints.Count, redTitle + ":", redPoints.Count),
-            //    TextHorizontalAlignment = HorizontalAlignment.Left,
-            //    TextVerticalAlignment = VerticalAlignment.Bottom,
-            //    FontSize = 25,
-            //};
-
             plot.Axes.Add(yAxis);
             plot.Axes.Add(xAxis);
-            plot.Series.Add(greenSeries);
-            plot.Series.Add(orangeSeries);
-            plot.Series.Add(redSeries);
-            //plot.Annotations.Add(annotation);
+
+            foreach (var item in data)
+            {
+                var series = new ScatterSeries
+                {
+                    Title = item.TitleFormatted.TitleFormatted,
+                    MarkerType = item.PointMarker,
+                    MarkerStrokeThickness = seriesPointStrokeThickness,
+                    MarkerSize = seriesPointMarkerSize,
+                    MarkerFill = item.PointColor,
+                    ItemsSource = item.Points,
+                    Mapping = pointMapper,
+                    TrackerFormatString = trackerFormatString,
+                };
+
+                plot.Series.Add(series);
+            }
 
             return plot;
         }
 
         #region Fancy text formatting
 
-        private static void SetCombinedTextToEqualWidth(string in1P1, string in1P2, string in2P1, string in2P2, string in3P1, string in3P2, int gapSpaceCount, out string out1, out string out2, out string out3,
-            double fontSize, Typeface typeface = null)
+        private class TitleSpaceFormattingCombined
+        {
+            public TitleSpaceFormmatting TitlePart1 { get; }
+            public TitleSpaceFormmatting TitlePart2 { get; }
+            public string TitleFormatted { get; set; }
+            public double CalculatedFinalWidth { get; set; }
+            public double MaxCalculatedFinalWidthOthers { get; set; }
+
+            public TitleSpaceFormattingCombined(string titlePart1, string titlePart2)
+            {
+                TitlePart1 = new TitleSpaceFormmatting(titlePart1);
+                TitlePart2 = new TitleSpaceFormmatting(titlePart2);
+            }
+        }
+
+        private static void SetCombinedTextToEqualWidth(List<TitleSpaceFormattingCombined> textItems, int gapSpaceCount, double fontSize, Typeface typeface = null)
         {
             if (typeface == null)
             {
                 typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Medium);
             }
 
-            SetTextToEqualWidth(in1P1, in2P1, in3P1, out var in1P1Fmt, out var in2P1Fmt, out var in3P1Fmt, fontSize, false, false, typeface);
-            SetTextToEqualWidth(in1P2, in2P2, in3P2, out var in1P2Fmt, out var in2P2Fmt, out var in3P2Fmt, fontSize, true, false, typeface);
+            SetTextToEqualWidth(textItems.Select(x => x.TitlePart1).ToList(), fontSize, false, false, typeface);
+            SetTextToEqualWidth(textItems.Select(x => x.TitlePart2).ToList(), fontSize, true, false, typeface);
 
             var gapSpaces = new string('\u00A0', Math.Max(gapSpaceCount, 0));
 
-            var in1Fmtted = new FormattedText(in1P1Fmt + gapSpaces + in1P2Fmt, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var in2Fmtted = new FormattedText(in2P1Fmt + gapSpaces + in2P2Fmt, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var in3Fmtted = new FormattedText(in3P1Fmt + gapSpaces + in3P2Fmt, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var in1Width = in1Fmtted.Width;
-            var in2Width = in2Fmtted.Width;
-            var in3Width = in3Fmtted.Width;
-
-            var calcIn1Width = in1Width;
-            var calcIn2Width = in2Width;
-            var calcIn3Width = in3Width;
+            foreach (var item in textItems)
+            {
+                var fmtted = new FormattedText(item.TitlePart1.TitleFormatted + gapSpaces + item.TitlePart2.TitleFormatted, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
+                item.CalculatedFinalWidth = fmtted.Width;
+            }
 
             var spaceWidths = GetSpaceWidthsForFontSettings(fontSize, typeface);
 
             foreach (var spaceType in spaceWidths.OrderByDescending(x => x.Value))
             {
-                if (Math.Max(calcIn2Width, calcIn3Width) - calcIn1Width >= spaceType.Value)
+                var maxCalcWidth = textItems.Max(x => x.CalculatedFinalWidth);
+                foreach (var item in textItems)
                 {
-                    in1P1Fmt += spaceType.Key;
-                    calcIn1Width += spaceType.Value;
-                }
-                if (Math.Max(calcIn1Width, calcIn3Width) - calcIn2Width >= spaceType.Value)
-                {
-                    in2P1Fmt += spaceType.Key;
-                    calcIn2Width += spaceType.Value;
-                }
-                if (Math.Max(calcIn1Width, calcIn2Width) - calcIn3Width >= spaceType.Value)
-                {
-                    in3P1Fmt += spaceType.Key;
-                    calcIn3Width += spaceType.Value;
+                    if (maxCalcWidth - item.CalculatedFinalWidth >= spaceType.Value)
+                    {
+                        item.TitlePart1.TitleFormatted += spaceType.Key;
+                        item.CalculatedFinalWidth += spaceType.Value;
+                    }
                 }
             }
 
             var littleSpace = spaceWidths.Where(x => x.Value > 0.5).OrderBy(x => x.Value).First();
-            var max12 = Math.Max(calcIn1Width, calcIn2Width);
-            var max13 = Math.Max(calcIn1Width, calcIn3Width);
-            var max23 = Math.Max(calcIn2Width, calcIn3Width);
-            if (max23 - calcIn1Width > 0 && (calcIn1Width + littleSpace.Value) - max23 < max23 - calcIn1Width)
+            foreach (var item in textItems)
             {
-                in1P1Fmt += littleSpace.Key;
-                calcIn1Width += littleSpace.Value;
-            }
-            if (max13 - calcIn2Width > 0 && (calcIn2Width + littleSpace.Value) - max13 < max13 - calcIn2Width)
-            {
-                in2P1Fmt += littleSpace.Key;
-                calcIn2Width += littleSpace.Value;
-            }
-            if (max12 - calcIn3Width > 0 && (calcIn3Width + littleSpace.Value) - max12 < max12 - calcIn3Width)
-            {
-                in3P1Fmt += littleSpace.Key;
-                calcIn3Width += littleSpace.Value;
+                item.MaxCalculatedFinalWidthOthers = textItems.Where(x => x != item).Max(x => x.CalculatedFinalWidth);
             }
 
-            //Console.WriteLine("{0,8:F3} {1,8:F3}", in1Width, calcIn1Width);
-            //Console.WriteLine("{0,8:F3} {1,8:F3}", in2Width, calcIn2Width);
-            out1 = in1P1Fmt + gapSpaces + in1P2Fmt;
-            out2 = in2P1Fmt + gapSpaces + in2P2Fmt;
-            out3 = in3P1Fmt + gapSpaces + in3P2Fmt;
+            foreach (var item in textItems)
+            {
+                if (item.MaxCalculatedFinalWidthOthers - item.CalculatedFinalWidth > 0 &&
+                    (item.CalculatedFinalWidth + littleSpace.Value) - item.MaxCalculatedFinalWidthOthers <
+                    item.MaxCalculatedFinalWidthOthers - item.CalculatedFinalWidth)
+                {
+                    item.TitlePart1.TitleFormatted += littleSpace.Key;
+                    item.CalculatedFinalWidth += littleSpace.Value;
+                    item.TitleFormatted = item.TitlePart1.TitleFormatted + gapSpaces + item.TitlePart2.TitleFormatted;
+                }
+                else
+                {
+                    item.TitleFormatted = item.TitlePart1.TitleFormatted + gapSpaces + item.TitlePart2.TitleFormatted;
+                }
+            }
         }
 
-        private static void SetTextToEqualWidth(string in1, string in2, string in3, out string out1, out string out2, out string out3, double fontSize, bool padFront = false, bool fillDiff = true, Typeface typeface = null)
+        private class TitleSpaceFormmatting
+        {
+            public string Title { get; }
+            public string TitleFormatted { get; set; }
+            public double UngappedWidth { get; set; }
+            public double CalculatedFinalWidth { get; set; }
+
+            public TitleSpaceFormmatting(string title)
+            {
+                Title = title;
+                TitleFormatted = title;
+            }
+        }
+
+        private static void SetTextToEqualWidth(List<TitleSpaceFormmatting> textItems, double fontSize, bool padFront = false, bool fillDiff = true, Typeface typeface = null)
         {
             if (typeface == null)
             {
                 typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Medium);
             }
 
-            out1 = in1;
-            out2 = in2;
-            out3 = in3;
+            foreach (var item in textItems)
+            {
+                var fmtted = new FormattedText(item.Title, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
+                item.UngappedWidth = fmtted.Width;
+            }
 
-            var in1Fmtted = new FormattedText(in1, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var in2Fmtted = new FormattedText(in2, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var in3Fmtted = new FormattedText(in3, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var in1Width = in1Fmtted.Width;
-            var in2Width = in2Fmtted.Width;
-            var in3Width = in2Fmtted.Width;
-            var bigWidth = Math.Max(Math.Max(in1Width, in2Width), in3Width);
-            var in1WidthDiff = bigWidth - in1Width;
-            var in2WidthDiff = bigWidth - in2Width;
-            var in3WidthDiff = bigWidth - in3Width;
+            var bigWidth = textItems.Max(x => x.UngappedWidth);
 
             var spaceWidths = GetSpaceWidthsForFontSettings(fontSize, typeface);
             var spaceWidth = spaceWidths["\u00A0"];
 
-            //var in1WidthAdd = (int)Math.Round(in1WidthDiff / spaceWidth);
-            //var in2WidthAdd = (int)Math.Round(in2WidthDiff / spaceWidth);
-            var in1WidthAdd = (int)(in1WidthDiff / spaceWidth); // Truncate decimals, to leave better gaps for filling
-            var in2WidthAdd = (int)(in2WidthDiff / spaceWidth); // Truncate decimals, to leave better gaps for filling
-            var in3WidthAdd = (int)(in3WidthDiff / spaceWidth); // Truncate decimals, to leave better gaps for filling
-
-            var calcIn1Width = in1Width + in1WidthAdd * spaceWidth;
-            var calcIn2Width = in2Width + in2WidthAdd * spaceWidth;
-            var calcIn3Width = in3Width + in3WidthAdd * spaceWidth;
-            //var calcIn1WidthOrig = calcIn1Width;
-            //var calcIn2WidthOrig = calcIn2Width;
-
-            var out1Spaces = new string('\u00A0', Math.Max(in1WidthAdd, 0));
-            var out2Spaces = new string('\u00A0', Math.Max(in2WidthAdd, 0));
-            var out3Spaces = new string('\u00A0', Math.Max(in3WidthAdd, 0));
-            if (padFront)
+            foreach (var item in textItems)
             {
-                out1 = out1Spaces + out1;
-                out2 = out2Spaces + out2;
-                out3 = out3Spaces + out3;
-            }
-            else
-            {
-                out1 += out1Spaces;
-                out2 += out2Spaces;
-                out3 += out3Spaces;
+                var widthDiff = bigWidth - item.UngappedWidth;
+                var widthAdd = (int) (widthDiff / spaceWidth); // Truncate decimals, to leave better gaps for filling
+                item.CalculatedFinalWidth = item.UngappedWidth + widthAdd * spaceWidth;
+
+                var spaces = new string('\u00A0', Math.Max(widthAdd, 0));
+
+                if (padFront)
+                {
+                    item.TitleFormatted = spaces + item.TitleFormatted;
+                }
+                else
+                {
+                    item.TitleFormatted += spaces;
+                }
             }
 
             if (fillDiff)
             {
                 foreach (var spaceType in spaceWidths.OrderByDescending(x => x.Value))
                 {
-                    if (Math.Max(calcIn2Width, calcIn3Width) - calcIn1Width >= spaceType.Value)
+                    var maxCalcWidth = textItems.Max(x => x.CalculatedFinalWidth);
+                    foreach (var item in textItems)
                     {
-                        if (padFront)
+                        if (maxCalcWidth - item.CalculatedFinalWidth >= spaceType.Value)
                         {
-                            out1 = spaceType.Key + out1;
-                        }
-                        else
-                        {
-                            out1 += spaceType.Key;
-                        }
+                            if (padFront)
+                            {
+                                item.TitleFormatted = spaceType.Key + item.TitleFormatted;
+                            }
+                            else
+                            {
+                                item.TitleFormatted += spaceType.Key;
+                            }
 
-                        calcIn1Width += spaceType.Value;
-                    }
-                    if (Math.Max(calcIn1Width, calcIn3Width) - calcIn2Width >= spaceType.Value)
-                    {
-                        if (padFront)
-                        {
-                            out2 = spaceType.Key + out2;
+                            item.CalculatedFinalWidth += spaceType.Value;
                         }
-                        else
-                        {
-                            out2 += spaceType.Key;
-                        }
-
-                        calcIn2Width += spaceType.Value;
-                    }
-                    if (Math.Max(calcIn1Width, calcIn2Width) - calcIn3Width >= spaceType.Value)
-                    {
-                        if (padFront)
-                        {
-                            out3 = spaceType.Key + out3;
-                        }
-                        else
-                        {
-                            out3 += spaceType.Key;
-                        }
-
-                        calcIn3Width += spaceType.Value;
                     }
                 }
             }
-
-            //Console.WriteLine("{0,8:F3} {1,8:F3} {2,8:F3} {3,8:F3} {4,8:F3} {5,8:F3}", in1Width, bigWidth, in1WidthDiff, in1WidthAdd, calcIn1WidthOrig, calcIn1Width);
-            //Console.WriteLine("{0,8:F3} {1,8:F3} {2,8:F3} {3,8:F3} {4,8:F3} {5,8:F3}", in2Width, bigWidth, in2WidthDiff, in2WidthAdd, calcIn2WidthOrig, calcIn2Width);
         }
 
         /// <summary>
