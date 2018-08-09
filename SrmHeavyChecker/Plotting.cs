@@ -107,7 +107,7 @@ namespace SrmHeavyChecker
                 LegendFontSize = 20,
                 LegendBorder = OxyColors.Black,
                 LegendBorderThickness = 1,
-                //LegendItemAlignment = HorizontalAlignment.Right,
+                LegendItemAlignment = OxyPlot.HorizontalAlignment.Right,
                 LegendSymbolPlacement = LegendSymbolPlacement.Right,
             };
 
@@ -119,7 +119,7 @@ namespace SrmHeavyChecker
             {
                 Position = AxisPosition.Left,
                 Title = "Intensity",
-                StringFormat = "#e00",
+                StringFormat = "#.#e00",
                 FontSize = 20,
                 Minimum = 0,
                 AbsoluteMinimum = 0,
@@ -155,6 +155,98 @@ namespace SrmHeavyChecker
 
                 plot.Series.Add(series);
             }
+
+            return plot;
+        }
+
+        public static void PlotTransition(TransitionData transition, string filepath, ExportFormat format = ExportFormat.PNG)
+        {
+            if (format == ExportFormat.NoImageExport)
+            {
+                return;
+            }
+
+            var plot = CreateTransitionPlot(transition, format);
+
+            switch (format)
+            {
+                case ExportFormat.PDF:
+                    SavePlotToPdf(Path.ChangeExtension(filepath, "pdf"), plot);
+                    break;
+                case ExportFormat.SVG:
+                    SavePlotToSvg(Path.ChangeExtension(filepath, "svg"), plot);
+                    break;
+                case ExportFormat.PNG:
+                    GuaranteeSingleThreadApartment(() => SavePlotToPng(Path.ChangeExtension(filepath, "png"), plot));
+                    break;
+                case ExportFormat.JPEG:
+                    GuaranteeSingleThreadApartment(() => SavePlotToJpg(Path.ChangeExtension(filepath, "jpg"), plot));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public static PlotModel CreateTransitionPlot(TransitionData transition, ExportFormat format = ExportFormat.PNG)
+        {
+            if (format == ExportFormat.NoImageExport)
+            {
+                return null;
+            }
+
+            var plot = new OxyPlot.PlotModel()
+            {
+                TitlePadding = 0,
+                Title = transition.CompoundName,
+                LegendPosition = LegendPosition.RightTop,
+                LegendFontSize = 20,
+                LegendBorder = OxyColors.Black,
+                LegendBorderThickness = 1,
+                //LegendItemAlignment = HorizontalAlignment.Right,
+                LegendSymbolPlacement = LegendSymbolPlacement.Right,
+            };
+
+            var xMax = transition.StopTimeMinutes;
+            var xMin = transition.StartTimeMinutes;
+            var yMax = transition.MaxIntensity;
+
+            var yAxis = new LinearAxis
+            {
+                Position = AxisPosition.Left,
+                Title = "Intensity",
+                StringFormat = "#.#e00",
+                FontSize = 20,
+                Minimum = 0,
+                AbsoluteMinimum = 0,
+            };
+
+            var xAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = "Time (min)",
+                FontSize = 20,
+                Minimum = xMin,
+                AbsoluteMinimum = xMin,
+                Maximum = xMax,
+                AbsoluteMaximum = xMax,
+            };
+
+            plot.Axes.Add(yAxis);
+            plot.Axes.Add(xAxis);
+
+            var trackerFormatString = $"Scan: {{{nameof(TransitionData.DataPoint.Scan)}}}\nTime: {{{nameof(TransitionData.DataPoint.Time)}}}\nIntensity: {{{nameof(TransitionData.DataPoint.Intensity)}}}";
+            var pointMapper = new Func<object, DataPoint>(x => new DataPoint(((TransitionData.DataPoint)x).Time, ((TransitionData.DataPoint)x).Intensity));
+
+            var series = new LineSeries()
+            {
+                Title = $"{transition.ProductMz:F2}",
+                MarkerType = MarkerType.None,
+                ItemsSource = transition.Intensities,
+                Mapping = pointMapper,
+                TrackerFormatString = trackerFormatString,
+            };
+
+            plot.Series.Add(series);
 
             return plot;
         }
@@ -332,7 +424,7 @@ namespace SrmHeavyChecker
             {
                 Position = AxisPosition.Left,
                 Title = "Intensity (Log10)",
-                StringFormat = "#e00",
+                StringFormat = "#.#e00",
                 FontSize = 20,
                 Minimum = yAxisMin,
                 AbsoluteMinimum = yAxisMin,

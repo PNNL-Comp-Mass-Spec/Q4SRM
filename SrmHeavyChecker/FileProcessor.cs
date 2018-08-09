@@ -76,7 +76,7 @@ namespace SrmHeavyChecker
                 //Console.WriteLine("File \"{0}\": CombinedResults: {1}", rawFilePath, combined.Count);
 
                 CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
-                Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), outputFilePath, options.ImageSaveFormat);
+                Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), Path.ChangeExtension(outputFilePath, null) + "_summary", options.ImageSaveFormat);
                 var pdfPath = Path.ChangeExtension(outputFilePath, "pdf");
                 var pdfWriter = new PdfWriter(Path.GetFileNameWithoutExtension(rawFilePath), rawFilePath, pdfPath);
                 pdfWriter.WritePdf(results, options);
@@ -100,14 +100,43 @@ namespace SrmHeavyChecker
                         var name = Path.GetInvalidFileNameChars().Aggregate(compound.CompoundName, (current, c) => current.Replace(c.ToString(), "_"));
                         var namePrefix = (compound.PassesAllThresholds
                                              ? "P"
-                                             : (compound.PassesThreshold ? "" : "I") + (compound.PassesNET ? "" : "N")) + "_";
-                        var path = Path.Combine(imagesDir, namePrefix + name + ".png");
-                        Plotting.PlotCompound(compound, path);
+                                             : GetCompoundDataPrefix(compound)) + "_";
+                        var pathBase = Path.Combine(imagesDir, namePrefix + name);
+                        Plotting.PlotCompound(compound, pathBase + ".png", Plotting.ExportFormat.PDF);
+
+                        foreach (var transition in compound.Transitions)
+                        {
+                            var path = $"{pathBase}_{transition.ProductMz:F2}.png";
+                            Plotting.PlotTransition(transition, path, Plotting.ExportFormat.PDF);
+                        }
                     }
                 }
                 /**/
             }
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
+        }
+
+        private string GetCompoundDataPrefix(CompoundData result)
+        {
+            var items = new List<string>();
+            if (!result.PassesIntensity)
+            {
+                items.Add("int");
+            }
+            if (!result.PassesNET)
+            {
+                items.Add("pp");
+            }
+            if (!result.PassesElutionConcurrence)
+            {
+                items.Add("ec");
+            }
+            if (!result.PassesSignalToNoiseHeuristic)
+            {
+                items.Add("sn");
+            }
+
+            return string.Join("_", items);
         }
 
         private void CreateSummaryFile(IOptions options)
