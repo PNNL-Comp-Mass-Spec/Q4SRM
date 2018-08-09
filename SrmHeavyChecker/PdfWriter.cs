@@ -62,10 +62,13 @@ namespace SrmHeavyChecker
 
             Func<List<CompoundData>, int, int, int, XImage> summaryPlotCreateMethod = CreatePlot;
             Func<CompoundData, int, int, int, XImage> plotCreateMethod = CreatePlot;
+            var plotSizeMultiplier = 3d;
             if (useNonVectorImages)
             {
                 summaryPlotCreateMethod = CreatePlotPng;
                 plotCreateMethod = CreatePlotPng;
+                // Plot text is naturally larger in OxyPlot.WPF-rendered images, so increase the size multiplier
+                plotSizeMultiplier = 4;
             }
 
             // Guarantee that the plots will be backed at 300+ DPI
@@ -92,8 +95,8 @@ namespace SrmHeavyChecker
             var summaryPlotAspectRatio = 4.0 / 3.0;
             var summaryPlotWidth = currentPage.Width - DoublePageMargin;
             var summaryPlotHeight = summaryPlotWidth / summaryPlotAspectRatio;
-            var summaryPlotWidthWpf = (int)(summaryPlotWidth * 4);
-            var summaryPlotHeightWpf = (int)(summaryPlotHeight * 4);
+            var summaryPlotWidthWpf = (int)(summaryPlotWidth * plotSizeMultiplier);
+            var summaryPlotHeightWpf = (int)(summaryPlotHeight * plotSizeMultiplier);
             var summaryPlotImage = summaryPlotCreateMethod(results, summaryPlotWidthWpf, summaryPlotHeightWpf, resolution);
             AddPlot(summaryPlotImage, PageMargin, summaryPlotWidth, summaryPlotHeight, null);
             currentPageY += summaryPlotHeight + 25;
@@ -105,7 +108,7 @@ namespace SrmHeavyChecker
             currentPageY += AddText("Key: int=intensity, pp=peak position, ec=elution concurrence, sn=S/N heuristic", fontDefault);
 
             var plotSize = (currentPage.Width - DoublePageMargin - 10) / 3;
-            var wpfRenderSize = (int)(plotSize * 4);
+            var wpfRenderSize = (int)(plotSize * plotSizeMultiplier);
 
             // Check the resolution vs. pdf render size
             if (wpfRenderSize < desiredResolution / (double) resolution * plotSize)
