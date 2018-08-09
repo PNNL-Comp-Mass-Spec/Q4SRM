@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
 
@@ -69,9 +70,10 @@ namespace SrmHeavyQC
 
         public void CalculateStats(double compoundTotalIntensitySum, double edgeNetThresholdMinutes)
         {
-            MedianIntensity = Intensities.Median(x => x.Intensity);
-            // Avoid divide by zero/infinity
-            MaxIntensityVsMedian = MaxIntensity / Math.Max(MedianIntensity, 1);
+            // Ambient noise threshold: ignore the "0" values, but sometimes we see ~1 instead of zero.
+            // We generally don't care about the really low intensities anyway.
+            MedianIntensity = Intensities.Where(x => x.Intensity >= 5).Median(x => x.Intensity);
+            MaxIntensityVsMedian = MaxIntensity / MedianIntensity;
 
             MaxIntensityNET = (MaxIntensityTime - StartTimeMinutes) / (StopTimeMinutes - StartTimeMinutes);
             var edgeNetThreshold = (edgeNetThresholdMinutes) / (StopTimeMinutes - StartTimeMinutes);
