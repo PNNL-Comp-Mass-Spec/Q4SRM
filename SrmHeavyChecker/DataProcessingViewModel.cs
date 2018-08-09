@@ -134,7 +134,7 @@ namespace SrmHeavyChecker
 
             IsNotRunning = false;
             var processor = new FileProcessor();
-            await Task.Run(() => processor.RunProcessing(Options, cancellationTokenSrc));
+            await Task.Run(() => processor.RunProcessing(Options, cancellationTokenSrc, x => RxApp.MainThreadScheduler.Schedule(() => statusUpdate(x))));
             IsNotRunning = true;
             statusUpdate("Finished processing datasets.");
         }

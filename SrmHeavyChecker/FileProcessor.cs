@@ -10,7 +10,7 @@ namespace SrmHeavyChecker
 {
     public class FileProcessor
     {
-        public void RunProcessing(IOptions options, CancellationTokenSource cancelInformation)
+        public void RunProcessing(IOptions options, CancellationTokenSource cancelInformation, Action<string> statusUpdate = null)
         {
             if (options.MaxThreads == 1 || options.FilesToProcess.Count == 1)
             {
@@ -21,7 +21,7 @@ namespace SrmHeavyChecker
                         break;
                     }
 
-                    ProcessFile(options, file);
+                    ProcessFile(options, file, statusUpdate);
                 }
             }
             else
@@ -31,7 +31,7 @@ namespace SrmHeavyChecker
                     MaxDegreeOfParallelism = options.MaxThreads,
                     CancellationToken = cancelInformation.Token,
                 };
-                Parallel.ForEach(options.FilesToProcess, parallelOptions, x => ProcessFile(options, x));
+                Parallel.ForEach(options.FilesToProcess, parallelOptions, x => ProcessFile(options, x, statusUpdate));
             }
 
             CreateSummaryFile(options);
@@ -53,7 +53,7 @@ namespace SrmHeavyChecker
             return Path.Combine(outputFolder, outputFileName);
         }
 
-        private void ProcessFile(IOptions options, string rawFilePath)
+        private void ProcessFile(IOptions options, string rawFilePath, Action<string> statusUpdate = null)
         {
             var outputFilePath = GetOutputFileForDataset(options, rawFilePath);
 
@@ -64,6 +64,7 @@ namespace SrmHeavyChecker
             }
 
             Console.WriteLine("Processing file \"{0}\"", rawFilePath);
+            statusUpdate?.Invoke($"Processing file \"{rawFilePath}\"");
             using (var rawReader = new XCalDataReader(rawFilePath))
             {
                 var results = rawReader.ReadRawData(options);
@@ -114,6 +115,7 @@ namespace SrmHeavyChecker
                 /**/
             }
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
+            statusUpdate?.Invoke($"Finished Processing file \"{rawFilePath}\"");
         }
 
         private string GetCompoundDataPrefix(CompoundData result)
