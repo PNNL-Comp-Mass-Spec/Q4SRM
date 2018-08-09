@@ -258,11 +258,13 @@ namespace SrmHeavyChecker
                 return null;
             }
 
-            var passed = new SeriesData(results.Where(x => x.PassesIntensity && x.PassesNET).ToList(), "Passed", OxyColors.Green, MarkerType.Circle);
-            var edge = new SeriesData(results.Where(x => x.PassesIntensity && !x.PassesNET).ToList(), "Elution Edge", OxyColors.Orange, MarkerType.Diamond);
-            var failed = new SeriesData(results.Where(x => !x.PassesIntensity).ToList(), "Low Intensity", OxyColors.Red, MarkerType.Triangle);
+            var passed = new SeriesData(results.Where(x => x.PassesAllThresholds).ToList(), "Passed", OxyColor.FromRgb(0, 158, 115), MarkerType.Circle);
+            var concur = new SeriesData(results.Where(x => x.PassesIntensity && x.PassesNET && x.PassesSignalToNoiseHeuristic && !x.PassesElutionConcurrence).ToList(), "Concurrence", OxyColor.FromRgb(204, 121, 167), MarkerType.Star);
+            var sn = new SeriesData(results.Where(x => x.PassesIntensity && x.PassesNET && !x.PassesSignalToNoiseHeuristic).ToList(), "S/N Heuristic", OxyColor.FromRgb(0, 114, 178), MarkerType.Square);
+            var edge = new SeriesData(results.Where(x => x.PassesIntensity && !x.PassesNET).ToList(), "Elution Edge", OxyColor.FromRgb(230, 159, 0), MarkerType.Diamond);
+            var failed = new SeriesData(results.Where(x => !x.PassesIntensity).ToList(), "Low Intensity", OxyColor.FromRgb(213, 94, 0), MarkerType.Triangle);
 
-            var items = new List<SeriesData>() {passed, edge, failed};
+            var items = new List<SeriesData>() {passed, concur, sn, edge, failed};
 
             // TODO: Add "Peak Concurrence", "S/N Heuristic"
             var plot = CreatePlotFromData(datasetName, items, format);
@@ -299,9 +301,16 @@ namespace SrmHeavyChecker
             }
         }
 
-        private static void SavePlotToSvg(string filePath, PlotModel plot)
+        public static void SavePlotToPdf(Stream outStream, PlotModel plot, double width, double height)
         {
             // OxyPlot.Core: Works, but is PDF; SVG should also work from core.
+            var pdfExporter = new PdfExporter { Width = width, Height = height };
+            pdfExporter.Export(plot, outStream);
+        }
+
+        private static void SavePlotToSvg(string filePath, PlotModel plot)
+        {
+            // OxyPlot.Core: Works, but is SVG; PDF should also work from core.
             using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
             {
                 var svgExporter = new SvgExporter { Width = ExportImageWidth, Height = ExportImageHeight };
@@ -384,7 +393,7 @@ namespace SrmHeavyChecker
             double seriesPointStrokeThickness = 0;
             double seriesPointMarkerSize = Math.Max(3, 7 - Math.Log10(allPoints.Count));
 
-            var typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Medium);
+            var typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Normal);
 
             var font = plot.LegendFont;
             if (string.IsNullOrWhiteSpace(font))
@@ -400,17 +409,36 @@ namespace SrmHeavyChecker
             switch (exFormat)
             {
                 case ExportFormat.PDF:
+                    typeface = new Typeface("Arial");
+                    // These don't use Windows WPF rendering, so we can't determine text width correctly for the output.
+                    // Limit to spaces only for a "Close enough" approximation
+                    SetCombinedTextToEqualWidth(data.Select(x => x.TitleFormatted).ToList(), 2, plot.LegendFontSize, typeface, true);
+                    break;
                 case ExportFormat.SVG:
                     // These don't use Windows WPF rendering, so we can't determine text width correctly for the output.
+                    // Limit to spaces only for a "Close enough" approximation
+                    SetCombinedTextToEqualWidth(data.Select(x => x.TitleFormatted).ToList(), 2, plot.LegendFontSize, typeface, true);
+
+                    // Artificially inflate the titles so that they don't overlap with the symbols
+                    foreach (var item in data)
+                    {
+                        item.TitleFormatted.TitleFormatted += "         ";
+                    }
+                    break;
                     goto default;
                 case ExportFormat.PNG:
                 case ExportFormat.JPEG:
                     SetCombinedTextToEqualWidth(data.Select(x => x.TitleFormatted).ToList(), 2, plot.LegendFontSize, typeface);
                     break;
                 default:
+                    // Act as if the font was monospaced
+                    var titleP1MaxWidth = data.Max(x => x.TitleFormatted.TitlePart1.Title.Length);
+                    var titleP2MaxWidth = data.Max(x => x.TitleFormatted.TitlePart2.Title.Length);
                     foreach (var item in data)
                     {
-                        item.TitleFormatted.TitleFormatted = $"{item.Title} {"(" + item.Points.Count + ")",6}";
+                        var p1Diff = titleP1MaxWidth - item.TitleFormatted.TitlePart1.Title.Length;
+                        var p2Diff = titleP2MaxWidth - item.TitleFormatted.TitlePart2.Title.Length;
+                        item.TitleFormatted.TitleFormatted = $"{item.TitleFormatted.TitlePart1.Title}{new string(' ', p1Diff + p2Diff + 6)}{item.TitleFormatted.TitlePart2.Title}";
                     }
                     break;
             }
@@ -451,13 +479,20 @@ namespace SrmHeavyChecker
 
             foreach (var item in data)
             {
+                var pointStrokeThickness = seriesPointStrokeThickness;
+                if (item.PointMarker == MarkerType.Cross || item.PointMarker == MarkerType.Plus || item.PointMarker == MarkerType.Star)
+                {
+                    pointStrokeThickness += 2;
+                }
+
                 var series = new ScatterSeries
                 {
                     Title = item.TitleFormatted.TitleFormatted,
                     MarkerType = item.PointMarker,
-                    MarkerStrokeThickness = seriesPointStrokeThickness,
+                    MarkerStrokeThickness = pointStrokeThickness,
                     MarkerSize = seriesPointMarkerSize,
                     MarkerFill = item.PointColor,
+                    MarkerStroke = item.PointColor,
                     ItemsSource = item.Points,
                     Mapping = pointMapper,
                     TrackerFormatString = trackerFormatString,
@@ -486,15 +521,15 @@ namespace SrmHeavyChecker
             }
         }
 
-        private static void SetCombinedTextToEqualWidth(List<TitleSpaceFormattingCombined> textItems, int gapSpaceCount, double fontSize, Typeface typeface = null)
+        private static void SetCombinedTextToEqualWidth(List<TitleSpaceFormattingCombined> textItems, int gapSpaceCount, double fontSize, Typeface typeface = null, bool onlyNormalSpace = false)
         {
             if (typeface == null)
             {
-                typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Medium);
+                typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Normal);
             }
 
-            SetTextToEqualWidth(textItems.Select(x => x.TitlePart1).ToList(), fontSize, false, false, typeface);
-            SetTextToEqualWidth(textItems.Select(x => x.TitlePart2).ToList(), fontSize, true, false, typeface);
+            SetTextToEqualWidth(textItems.Select(x => x.TitlePart1).ToList(), fontSize, false, false, typeface, onlyNormalSpace);
+            SetTextToEqualWidth(textItems.Select(x => x.TitlePart2).ToList(), fontSize, true, false, typeface, onlyNormalSpace);
 
             var gapSpaces = new string('\u00A0', Math.Max(gapSpaceCount, 0));
 
@@ -505,6 +540,10 @@ namespace SrmHeavyChecker
             }
 
             var spaceWidths = GetSpaceWidthsForFontSettings(fontSize, typeface);
+            if (onlyNormalSpace)
+            {
+                spaceWidths = new Dictionary<string, double>() { { "\u00A0", spaceWidths["\u00A0"] } };
+            }
 
             foreach (var spaceType in spaceWidths.OrderByDescending(x => x.Value))
             {
@@ -556,7 +595,7 @@ namespace SrmHeavyChecker
             }
         }
 
-        private static void SetTextToEqualWidth(List<TitleSpaceFormmatting> textItems, double fontSize, bool padFront = false, bool fillDiff = true, Typeface typeface = null)
+        private static void SetTextToEqualWidth(List<TitleSpaceFormmatting> textItems, double fontSize, bool padFront = false, bool fillDiff = true, Typeface typeface = null, bool onlyNormalSpace = false)
         {
             if (typeface == null)
             {
@@ -572,6 +611,10 @@ namespace SrmHeavyChecker
             var bigWidth = textItems.Max(x => x.UngappedWidth);
 
             var spaceWidths = GetSpaceWidthsForFontSettings(fontSize, typeface);
+            if (onlyNormalSpace)
+            {
+                spaceWidths = new Dictionary<string, double>() { {"\u00A0", spaceWidths["\u00A0"]} };
+            }
             var spaceWidth = spaceWidths["\u00A0"];
 
             foreach (var item in textItems)
