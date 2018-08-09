@@ -1,4 +1,4 @@
-﻿using SrmHeavyQC;
+﻿using SrmHeavyQC.Settings;
 
 namespace SrmHeavyQCTests
 {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
-using SrmHeavyQC;
+using SrmHeavyQC.Data;
+using SrmHeavyQC.Output;
+using SrmHeavyQC.Settings;
 
 namespace SrmHeavyQCTests
 {

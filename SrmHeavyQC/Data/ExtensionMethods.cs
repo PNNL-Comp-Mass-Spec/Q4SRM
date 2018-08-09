@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SrmHeavyQC
+namespace SrmHeavyQC.Data
 {
     public static class ExtensionMethods
     {

@@ -1,4 +1,4 @@
-﻿namespace SrmHeavyQC
+﻿namespace SrmHeavyQC.Settings
 {
     public interface ISettingsData
     {

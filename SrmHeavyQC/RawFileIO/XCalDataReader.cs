@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SrmHeavyQC.Data;
+using SrmHeavyQC.Settings;
 using ThermoFisher.CommonCore.Data;
 using ThermoFisher.CommonCore.Data.Business;
 using ThermoFisher.CommonCore.Data.Interfaces;
 
-namespace SrmHeavyQC
+namespace SrmHeavyQC.RawFileIO
 {
     public class XCalDataReader : IDisposable
     {

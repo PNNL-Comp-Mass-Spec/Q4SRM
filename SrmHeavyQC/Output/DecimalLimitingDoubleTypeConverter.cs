@@ -3,7 +3,7 @@ using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using PRISM;
 
-namespace SrmHeavyQC
+namespace SrmHeavyQC.Output
 {
     /// <summary>
     /// Implementation of CsvHelper's DoubleConverter that limits the decimal places to 4 digits for values &lt; 10, with fewer decimal places for larger values (by 4 - log10(val))

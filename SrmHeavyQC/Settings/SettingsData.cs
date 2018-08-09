@@ -1,4 +1,4 @@
-﻿namespace SrmHeavyQC
+﻿namespace SrmHeavyQC.Settings
 {
     internal class SettingsData : ISettingsData
     {

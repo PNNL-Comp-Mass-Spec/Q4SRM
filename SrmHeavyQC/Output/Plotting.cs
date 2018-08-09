@@ -11,9 +11,9 @@ using System.Windows.Media.Imaging;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using SrmHeavyQC;
+using SrmHeavyQC.Data;
 
-namespace SrmHeavyChecker
+namespace SrmHeavyQC.Output
 {
     public class Plotting
     {
@@ -425,7 +425,6 @@ namespace SrmHeavyChecker
                         item.TitleFormatted.TitleFormatted += "         ";
                     }
                     break;
-                    goto default;
                 case ExportFormat.PNG:
                 case ExportFormat.JPEG:
                     SetCombinedTextToEqualWidth(data.Select(x => x.TitleFormatted).ToList(), 2, plot.LegendFontSize, typeface);

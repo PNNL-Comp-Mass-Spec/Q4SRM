@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using ReactiveUI;
+using SrmHeavyQC;
+using SrmHeavyQC.Output;
 
 namespace SrmHeavyChecker
 {

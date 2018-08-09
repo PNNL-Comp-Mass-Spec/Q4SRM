@@ -3,8 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using SrmHeavyQC.Data;
 
-namespace SrmHeavyQC
+namespace SrmHeavyQC.Settings
 {
     public static class ISettingsDataExtensions
     {

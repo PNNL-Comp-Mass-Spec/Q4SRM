@@ -3,8 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using SrmHeavyQC.Data;
 
-namespace SrmHeavyQC
+namespace SrmHeavyQC.RawFileIO
 {
     public class XCalInstMethod
     {

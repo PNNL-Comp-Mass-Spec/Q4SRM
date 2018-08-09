@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows;
 using System.Windows.Media;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
-using PdfSharp.Pdf.IO;
-using SrmHeavyQC;
+using SrmHeavyQC.Data;
+using SrmHeavyQC.Settings;
 
-namespace SrmHeavyChecker
+namespace SrmHeavyQC.Output
 {
     public class PdfWriter
     {

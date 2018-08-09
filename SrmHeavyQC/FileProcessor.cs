@@ -4,9 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using SrmHeavyQC;
+using SrmHeavyQC.Data;
+using SrmHeavyQC.Output;
+using SrmHeavyQC.RawFileIO;
+using SrmHeavyQC.Settings;
 
-namespace SrmHeavyChecker
+namespace SrmHeavyQC
 {
     public class FileProcessor
     {

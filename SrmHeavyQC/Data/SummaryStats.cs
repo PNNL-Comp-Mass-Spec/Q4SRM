@@ -3,9 +3,8 @@ using System.IO;
 using System.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
-using SrmHeavyQC;
 
-namespace SrmHeavyChecker
+namespace SrmHeavyQC.Data
 {
     public class SummaryStats
     {

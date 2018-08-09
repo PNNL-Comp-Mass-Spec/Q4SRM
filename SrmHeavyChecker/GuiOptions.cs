@@ -4,6 +4,8 @@ using System.IO;
 using System.Reactive.Concurrency;
 using PRISM;
 using ReactiveUI;
+using SrmHeavyQC.Output;
+using SrmHeavyQC.Settings;
 
 namespace SrmHeavyChecker
 {

@@ -4,7 +4,7 @@ using System.IO;
 using CsvHelper;
 using CsvHelper.Configuration;
 
-namespace SrmHeavyQC
+namespace SrmHeavyQC.Data
 {
     public class CompoundThresholdData
     {

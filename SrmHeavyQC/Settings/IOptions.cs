@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using SrmHeavyQC;
+using SrmHeavyQC.Output;
 
-namespace SrmHeavyChecker
+namespace SrmHeavyQC.Settings
 {
     public interface IOptions : ISettingsData
     {

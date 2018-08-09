@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using PRISM;
+using SrmHeavyQC;
 
 namespace SrmHeavyChecker
 {
