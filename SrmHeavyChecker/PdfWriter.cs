@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using SrmHeavyQC;
 
 namespace SrmHeavyChecker
@@ -25,7 +27,7 @@ namespace SrmHeavyChecker
         private readonly XFont fontHeader;
         private readonly XFont fontHeader2;
         private readonly XFont fontDefault;
-        private readonly Typeface typeface;
+        private readonly FontFamily fontFamily;
 
         private double currentPageY;
 
@@ -39,23 +41,31 @@ namespace SrmHeavyChecker
             DatasetPath = datasetPath;
             SavePath = savePath;
 
-            typeface = new Typeface(SystemFonts.MessageFontFamily, SystemFonts.MessageFontStyle, SystemFonts.MessageFontWeight, FontStretches.Medium);
-            fontHeader = new XFont(typeface, 20);
-            fontHeader2 = new XFont(typeface, 16);
-            fontDefault = new XFont(typeface, 10);
+            fontFamily = new FontFamily("Arial");
+            fontHeader = new XFont(fontFamily, 20, XFontStyle.Regular);
+            fontHeader2 = new XFont(fontFamily, 16, XFontStyle.Regular);
+            fontDefault = new XFont(fontFamily, 10, XFontStyle.Regular);
             document = new PdfDocument();
             AddPage();
         }
 
-        public void WritePdf(List<CompoundData> results, ISettingsData settings)
+        public void WritePdf(List<CompoundData> results, ISettingsData settings, bool useNonVectorImages = false)
         {
-            if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
+            if (useNonVectorImages && Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
             {
-                var thread = new Thread(() => WritePdf(results, settings));
+                var thread = new Thread(() => WritePdf(results, settings, useNonVectorImages));
                 thread.SetApartmentState(ApartmentState.STA);
                 thread.Start();
                 thread.Join();
                 return;
+            }
+
+            Func<List<CompoundData>, int, int, int, XImage> summaryPlotCreateMethod = CreatePlot;
+            Func<CompoundData, int, int, int, XImage> plotCreateMethod = CreatePlot;
+            if (useNonVectorImages)
+            {
+                summaryPlotCreateMethod = CreatePlotPng;
+                plotCreateMethod = CreatePlotPng;
             }
 
             // Guarantee that the plots will be backed at 300+ DPI
@@ -84,7 +94,7 @@ namespace SrmHeavyChecker
             var summaryPlotHeight = summaryPlotWidth / summaryPlotAspectRatio;
             var summaryPlotWidthWpf = (int)(summaryPlotWidth * 4);
             var summaryPlotHeightWpf = (int)(summaryPlotHeight * 4);
-            var summaryPlotImage = CreatePlot(results, summaryPlotWidthWpf, summaryPlotHeightWpf, resolution);
+            var summaryPlotImage = summaryPlotCreateMethod(results, summaryPlotWidthWpf, summaryPlotHeightWpf, resolution);
             AddPlot(summaryPlotImage, PageMargin, summaryPlotWidth, summaryPlotHeight, null);
             currentPageY += summaryPlotHeight + 25;
 
@@ -120,7 +130,7 @@ namespace SrmHeavyChecker
 
                 counter++;
 
-                var plotImage = CreatePlot(result, wpfRenderSize, wpfRenderSize, resolution);
+                var plotImage = plotCreateMethod(result, wpfRenderSize, wpfRenderSize, resolution);
                 AddPlot(plotImage, xOffset, plotSize, plotSize, $"{counter}: {GetCompoundDataHeader(result)}");
                 xOffset += plotSize + 5;
             }
@@ -149,7 +159,7 @@ namespace SrmHeavyChecker
                 }
                 counter++;
 
-                var plotImage = CreatePlot(result, wpfRenderSize, wpfRenderSize, resolution);
+                var plotImage = plotCreateMethod(result, wpfRenderSize, wpfRenderSize, resolution);
                 AddPlot(plotImage, xOffset, plotSize, plotSize, null);
                 xOffset += plotSize;
             }
@@ -210,6 +220,74 @@ namespace SrmHeavyChecker
         /// <returns></returns>
         private XImage CreatePlot(CompoundData result, int width, int height, int resolution = 96)
         {
+            var plot = Plotting.CreateCompoundPlot(result, Plotting.ExportFormat.PDF);
+            using (var memStream = new MisbehavingMemoryStream())
+            {
+                memStream.PreventDispose = true;
+                Plotting.SavePlotToPdf(memStream, plot, width, height);
+                memStream.Seek(0, SeekOrigin.Begin);
+                var pdfForm = XPdfForm.FromStream(memStream);
+                memStream.PreventDispose = false;
+                return pdfForm;
+            }
+        }
+
+        /// <summary>
+        /// Create the plot, and convert it to an XImage. Remember to dispose of the returned object, and that this MUST be run with threading ApartmentState.STA
+        /// </summary>
+        /// <param name="results"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="resolution"></param>
+        /// <returns></returns>
+        private XImage CreatePlot(List<CompoundData> results, int width, int height, int resolution = 96)
+        {
+            var plot = Plotting.CreatePlot(results, DatasetName, Plotting.ExportFormat.PDF);
+            using (var memStream = new MisbehavingMemoryStream())
+            {
+                memStream.PreventDispose = true;
+                Plotting.SavePlotToPdf(memStream, plot, width, height);
+                memStream.Seek(0, SeekOrigin.Begin);
+                var pdfForm = XPdfForm.FromStream(memStream);
+                memStream.PreventDispose = false;
+                return pdfForm;
+            }
+        }
+
+        /// <summary>
+        /// OxyPlot improperly closes the passed-in stream on the PdfExport. This class gets around it by disallowing the dispose based on a flag.
+        /// </summary>
+        private class MisbehavingMemoryStream : MemoryStream
+        {
+            public bool PreventDispose { get; set; }
+
+            public override void Close()
+            {
+                if (!PreventDispose)
+                {
+                    base.Close();
+                }
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (!PreventDispose)
+                {
+                    base.Dispose(disposing);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Create the plot, and convert it to an XImage. Remember to dispose of the returned object, and that this MUST be run with threading ApartmentState.STA
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="resolution"></param>
+        /// <returns></returns>
+        private XImage CreatePlotPng(CompoundData result, int width, int height, int resolution = 96)
+        {
             var plot = Plotting.CreateCompoundPlot(result);
             var bitmap = Plotting.ConvertToBitmapImage(plot, width, height, resolution);
             bitmap.Freeze();
@@ -225,7 +303,7 @@ namespace SrmHeavyChecker
         /// <param name="height"></param>
         /// <param name="resolution"></param>
         /// <returns></returns>
-        private XImage CreatePlot(List<CompoundData> results, int width, int height, int resolution = 96)
+        private XImage CreatePlotPng(List<CompoundData> results, int width, int height, int resolution = 96)
         {
             var plot = Plotting.CreatePlot(results, DatasetName);
             var bitmap = Plotting.ConvertToBitmapImage(plot, width, height, resolution);
