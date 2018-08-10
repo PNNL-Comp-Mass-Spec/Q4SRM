@@ -7,7 +7,7 @@ using Q4SRM.Output;
 using Q4SRM.Settings;
 using ReactiveUI;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     public class GuiOptions : ReactiveObject, IOptions
     {

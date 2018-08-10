@@ -40,38 +40,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-    </Compile>
     <Compile Include="CmdLineOptions.cs" />
-    <Compile Include="DataPlotView.xaml.cs">
-      <DependentUpon>DataPlotView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="DataPlotViewModel.cs" />
-    <Compile Include="DataProcessingView.xaml.cs">
-      <DependentUpon>DataProcessingView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="DataProcessingViewModel.cs" />
-    <Compile Include="DatasetGridView.xaml.cs">
-      <DependentUpon>DatasetGridView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="DatasetGridViewModel.cs" />
-    <Compile Include="DatasetInfo.cs" />
-    <Compile Include="GuiOptions.cs" />
-    <Compile Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -79,23 +50,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Extended.Wpf.Toolkit">
-      <Version>3.4.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.WindowsAPICodePack-Shell">
-      <Version>1.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="OxyPlot.Core">
-      <Version>1.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="OxyPlot.Wpf">
-      <Version>1.0.0</Version>
-    </PackageReference>
     <PackageReference Include="PRISM-Library">
       <Version>2.4.92</Version>
-    </PackageReference>
-    <PackageReference Include="ReactiveUI.WPF">
-      <Version>8.4.4</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -104,36 +60,9 @@
       <Name>Q4SRM</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </ApplicationDefinition>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="DataPlotView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="DataProcessingView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="DatasetGridView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y /f /d "$(SolutionDir)Lib\ThermoFisher.*.dll" "$(TargetDir)"
-
-rem Remove the Extended WPF Toolkit AvalonDock dlls and folders - using powershell for flexibility
-powershell.exe -NonInteractive -Command "&amp; { cd \"$(TargetDir)\\" ; ForEach ($file in (Get-ChildItem *.AvalonDock.* -Recurse)) { $dirName = $file.DirectoryName ; Remove-Item $file.FullName ; If ((Measure-Object -InputObject (Get-ChildItem $dirName\*)).Count -eq 0) { Remove-Item $dirName -Recurse }}}"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

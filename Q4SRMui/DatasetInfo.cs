@@ -2,7 +2,7 @@
 using System.IO;
 using ReactiveUI;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     public class DatasetInfo : ReactiveObject
     {

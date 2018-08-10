@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using System.Windows.Data;
 using ReactiveUI;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     public class DatasetGridViewModel : ReactiveObject
     {

@@ -1,30 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 using PRISM;
 using Q4SRM;
-using SrmHeavyChecker;
 
 namespace Q4SRMcmd
 {
     public class Program
     {
-        [DllImport("kernel32.dll")]
-        static extern bool FreeConsole();
-
-        //[STAThread]
         public static void Main(string[] args)
         {
-            if (args.Length == 0)
-            {
-                FreeConsole();
-                // Run GUI
-                var thread = new Thread(() => { new App().Run(); });
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
-                return;
-            }
-
             // Run command-line
             var parser = new CommandLineParser<CmdLineOptions>();
             var parsed = parser.ParseArgs(args);

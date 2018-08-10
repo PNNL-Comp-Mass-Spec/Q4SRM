@@ -11,7 +11,7 @@ using Q4SRM.Data;
 using Q4SRM.Output;
 using ReactiveUI;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     public class DataPlotViewModel : ReactiveObject
     {

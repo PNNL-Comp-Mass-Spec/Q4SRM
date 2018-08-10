@@ -2,7 +2,7 @@
 using System.Threading;
 using ReactiveUI;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     public class MainWindowViewModel : ReactiveObject
     {

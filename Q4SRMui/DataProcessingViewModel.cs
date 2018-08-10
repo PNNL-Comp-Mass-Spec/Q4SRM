@@ -12,7 +12,7 @@ using Q4SRM;
 using Q4SRM.Output;
 using ReactiveUI;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     public class DataProcessingViewModel : ReactiveObject
     {

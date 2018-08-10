@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     /// <summary>
     /// Interaction logic for DatasetGridView.xaml

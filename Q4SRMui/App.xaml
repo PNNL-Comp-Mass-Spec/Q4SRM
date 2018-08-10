@@ -1,4 +1,4 @@
-﻿<Application x:Class="SrmHeavyChecker.App"
+﻿<Application x:Class="Q4SRMui.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Startup="ApplicationStartup">

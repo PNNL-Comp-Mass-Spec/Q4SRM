@@ -10,19 +10,23 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace SrmHeavyChecker
+namespace Q4SRMui
 {
     /// <summary>
-    /// Interaction logic for DataProcessingView.xaml
+    /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class DataProcessingView : UserControl
+    public partial class MainWindow : Window
     {
-        public DataProcessingView()
+        public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void Close_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
