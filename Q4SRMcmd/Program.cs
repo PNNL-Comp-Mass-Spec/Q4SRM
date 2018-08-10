@@ -3,8 +3,9 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using PRISM;
 using Q4SRM;
+using SrmHeavyChecker;
 
-namespace SrmHeavyChecker
+namespace Q4SRMcmd
 {
     public class Program
     {

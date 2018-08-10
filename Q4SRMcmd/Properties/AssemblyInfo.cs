@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SrmHeavyChecker")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Q4SRMcmd")]
+[assembly: AssemblyDescription("Command line version of Q4SRM")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SrmHeavyChecker")]
-[assembly: AssemblyCopyright("Copyright © PNNL 2017")]
+[assembly: AssemblyCompany("PNNL")]
+[assembly: AssemblyProduct("Q4SRMcmd")]
+[assembly: AssemblyCopyright("Copyright © PNNL 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

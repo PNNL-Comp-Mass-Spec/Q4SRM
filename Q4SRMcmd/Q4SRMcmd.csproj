@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{DD526CA6-4787-42E2-846F-34818CD0AE62}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SrmHeavyChecker</RootNamespace>
-    <AssemblyName>SrmHeavyChecker</AssemblyName>
+    <RootNamespace>Q4SRMcmd</RootNamespace>
+    <AssemblyName>Q4SRMcmd</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -36,7 +36,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>SrmHeavyChecker.Program</StartupObject>
+    <StartupObject>Q4SRMcmd.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

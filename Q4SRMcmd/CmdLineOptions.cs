@@ -5,7 +5,7 @@ using PRISM;
 using Q4SRM.Output;
 using Q4SRM.Settings;
 
-namespace SrmHeavyChecker
+namespace Q4SRMcmd
 {
     public class CmdLineOptions : IOptions
     {
