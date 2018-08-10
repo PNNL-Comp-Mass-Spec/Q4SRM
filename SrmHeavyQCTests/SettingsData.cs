@@ -1,4 +1,4 @@
-﻿using SrmHeavyQC.Settings;
+﻿using Q4SRM.Settings;
 
 namespace SrmHeavyQCTests
 {

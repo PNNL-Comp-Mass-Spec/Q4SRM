@@ -99,9 +99,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SrmHeavyQC\SrmHeavyQC.csproj">
+    <ProjectReference Include="..\Q4SRM\Q4SRM.csproj">
       <Project>{d57ce760-06ea-4312-a5c5-c07308253047}</Project>
-      <Name>SrmHeavyQC</Name>
+      <Name>Q4SRM</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

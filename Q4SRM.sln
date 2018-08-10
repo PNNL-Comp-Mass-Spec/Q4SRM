@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SrmHeavyQC", "SrmHeavyQC\SrmHeavyQC.csproj", "{D57CE760-06EA-4312-A5C5-C07308253047}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Q4SRM", "Q4SRM\Q4SRM.csproj", "{D57CE760-06EA-4312-A5C5-C07308253047}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SrmHeavyChecker", "SrmHeavyChecker\SrmHeavyChecker.csproj", "{DD526CA6-4787-42E2-846F-34818CD0AE62}"
 EndProject

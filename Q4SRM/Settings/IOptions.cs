@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using SrmHeavyQC.Output;
+using Q4SRM.Output;
 
-namespace SrmHeavyQC.Settings
+namespace Q4SRM.Settings
 {
     public interface IOptions : ISettingsData
     {

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using PRISM;
-using SrmHeavyQC.Output;
-using SrmHeavyQC.Settings;
+using Q4SRM.Output;
+using Q4SRM.Settings;
 
 namespace SrmHeavyChecker
 {

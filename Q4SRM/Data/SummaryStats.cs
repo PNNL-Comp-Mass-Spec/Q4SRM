@@ -4,7 +4,7 @@ using System.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
 
-namespace SrmHeavyQC.Data
+namespace Q4SRM.Data
 {
     public class SummaryStats
     {

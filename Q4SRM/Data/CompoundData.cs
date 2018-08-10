@@ -3,10 +3,10 @@ using System.IO;
 using System.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
-using SrmHeavyQC.Output;
-using SrmHeavyQC.Settings;
+using Q4SRM.Output;
+using Q4SRM.Settings;
 
-namespace SrmHeavyQC.Data
+namespace Q4SRM.Data
 {
     public class CompoundData
     {

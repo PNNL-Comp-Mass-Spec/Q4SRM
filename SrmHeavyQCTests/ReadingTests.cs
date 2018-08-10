@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Linq;
-using SrmHeavyQC.Data;
-using SrmHeavyQC.RawFileIO;
+using Q4SRM.Data;
+using Q4SRM.RawFileIO;
 
 namespace SrmHeavyQCTests
 {

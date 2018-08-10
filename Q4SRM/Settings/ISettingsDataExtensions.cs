@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
-using SrmHeavyQC.Data;
+using Q4SRM.Data;
 
-namespace SrmHeavyQC.Settings
+namespace Q4SRM.Settings
 {
     public static class ISettingsDataExtensions
     {

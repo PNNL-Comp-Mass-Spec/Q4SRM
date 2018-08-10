@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
-using SrmHeavyQC.Data;
-using SrmHeavyQC.Output;
-using SrmHeavyQC.Settings;
+using Q4SRM.Data;
+using Q4SRM.Settings;
 
 namespace SrmHeavyQCTests
 {

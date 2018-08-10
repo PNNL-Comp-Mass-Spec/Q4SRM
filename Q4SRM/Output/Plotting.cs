@@ -11,9 +11,9 @@ using System.Windows.Media.Imaging;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using SrmHeavyQC.Data;
+using Q4SRM.Data;
 
-namespace SrmHeavyQC.Output
+namespace Q4SRM.Output
 {
     public class Plotting
     {

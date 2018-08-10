@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using CsvHelper;
 using CsvHelper.Configuration;
-using SrmHeavyQC.Output;
+using Q4SRM.Output;
 
-namespace SrmHeavyQC.Data
+namespace Q4SRM.Data
 {
     public class TransitionData
     {

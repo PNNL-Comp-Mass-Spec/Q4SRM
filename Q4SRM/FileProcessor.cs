@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using SrmHeavyQC.Data;
-using SrmHeavyQC.Output;
-using SrmHeavyQC.RawFileIO;
-using SrmHeavyQC.Settings;
+using Q4SRM.Data;
+using Q4SRM.Output;
+using Q4SRM.RawFileIO;
+using Q4SRM.Settings;
 
-namespace SrmHeavyQC
+namespace Q4SRM
 {
     public class FileProcessor
     {

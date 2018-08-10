@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Concurrency;
 using PRISM;
+using Q4SRM.Output;
+using Q4SRM.Settings;
 using ReactiveUI;
-using SrmHeavyQC.Output;
-using SrmHeavyQC.Settings;
 
 namespace SrmHeavyChecker
 {

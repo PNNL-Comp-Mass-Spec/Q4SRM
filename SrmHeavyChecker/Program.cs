@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using PRISM;
-using SrmHeavyQC;
+using Q4SRM;
 
 namespace SrmHeavyChecker
 {

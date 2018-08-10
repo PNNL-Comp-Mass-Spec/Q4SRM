@@ -7,8 +7,8 @@
     <ProjectGuid>{D57CE760-06EA-4312-A5C5-C07308253047}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SrmHeavyQC</RootNamespace>
-    <AssemblyName>SrmHeavyQC</AssemblyName>
+    <RootNamespace>Q4SRM</RootNamespace>
+    <AssemblyName>Q4SRM</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

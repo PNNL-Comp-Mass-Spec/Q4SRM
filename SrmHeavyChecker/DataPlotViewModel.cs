@@ -7,9 +7,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OxyPlot;
+using Q4SRM.Data;
+using Q4SRM.Output;
 using ReactiveUI;
-using SrmHeavyQC.Data;
-using SrmHeavyQC.Output;
 
 namespace SrmHeavyChecker
 {

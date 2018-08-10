@@ -6,10 +6,10 @@ using System.Threading;
 using System.Windows.Media;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
-using SrmHeavyQC.Data;
-using SrmHeavyQC.Settings;
+using Q4SRM.Data;
+using Q4SRM.Settings;
 
-namespace SrmHeavyQC.Output
+namespace Q4SRM.Output
 {
     public class PdfWriter
     {
