@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Q4SRM", "Q4SRM\Q4SRM.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SrmHeavyChecker", "SrmHeavyChecker\SrmHeavyChecker.csproj", "{DD526CA6-4787-42E2-846F-34818CD0AE62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SrmHeavyQCTests", "SrmHeavyQCTests\SrmHeavyQCTests.csproj", "{8EDF4429-251A-416D-BB68-93F227191BCF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Q4SRMTests", "Q4SRMTests\Q4SRMTests.csproj", "{8EDF4429-251A-416D-BB68-93F227191BCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,6 @@
 ﻿using Q4SRM.Settings;
 
-namespace SrmHeavyQCTests
+namespace Q4SRMTests
 {
     internal class SettingsData : ISettingsData
     {

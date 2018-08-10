@@ -1,10 +1,10 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Linq;
+using NUnit.Framework;
 using Q4SRM.Data;
 using Q4SRM.RawFileIO;
 
-namespace SrmHeavyQCTests
+namespace Q4SRMTests
 {
     [TestFixture]
     public class ReadingTests

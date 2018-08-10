@@ -7,8 +7,8 @@
     <ProjectGuid>{8EDF4429-251A-416D-BB68-93F227191BCF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SrmHeavyQCTests</RootNamespace>
-    <AssemblyName>SrmHeavyQCTests</AssemblyName>
+    <RootNamespace>Q4SRMTests</RootNamespace>
+    <AssemblyName>Q4SRMTests</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -4,7 +4,7 @@ using NUnit.Framework;
 using Q4SRM.Data;
 using Q4SRM.Settings;
 
-namespace SrmHeavyQCTests
+namespace Q4SRMTests
 {
     [TestFixture]
     public class MiscTests
