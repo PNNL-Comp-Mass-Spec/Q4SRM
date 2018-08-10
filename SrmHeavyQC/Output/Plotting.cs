@@ -534,7 +534,7 @@ namespace SrmHeavyQC.Output
 
             foreach (var item in textItems)
             {
-                var fmtted = new FormattedText(item.TitlePart1.TitleFormatted + gapSpaces + item.TitlePart2.TitleFormatted, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
+                var fmtted = new FormattedText(item.TitlePart1.TitleFormatted + gapSpaces + item.TitlePart2.TitleFormatted, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
                 item.CalculatedFinalWidth = fmtted.Width;
             }
 
@@ -603,7 +603,7 @@ namespace SrmHeavyQC.Output
 
             foreach (var item in textItems)
             {
-                var fmtted = new FormattedText(item.Title, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
+                var fmtted = new FormattedText(item.Title, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
                 item.UngappedWidth = fmtted.Width;
             }
 
@@ -668,17 +668,17 @@ namespace SrmHeavyQC.Output
         private static Dictionary<string, double> GetSpaceWidthsForFontSettings(double fontSize, Typeface typeface)
         {
             const string spaceBookend = "e";
-            var spaceBookendFmtted = new FormattedText(spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            //var spaceFmtted = new FormattedText(spaceBookend + " " + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black); // normal space by itself outputs inaccurate width of 0
-            var spaceFmtted = new FormattedText("\u00A0", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black); // provides accurate width
-            var thinSpaceFmtted = new FormattedText(spaceBookend + "\u2009" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var hairSpaceFmtted = new FormattedText(spaceBookend + "\u200A" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            //var thinSpaceFmtted = new FormattedText("\u2009", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black); // outputs inaccurate width of 0
-            //var hairSpaceFmtted = new FormattedText("\u200A", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black); // does provide accurate width
-            var emDot33SpaceFmtted = new FormattedText(spaceBookend + "\u2004" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var emDot25SpaceFmtted = new FormattedText(spaceBookend + "\u2005" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var emDot1666SpaceFmtted = new FormattedText(spaceBookend + "\u2006" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
-            var punctSpaceFmtted = new FormattedText(spaceBookend + "\u2008" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black);
+            var spaceBookendFmtted = new FormattedText(spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
+            //var spaceFmtted = new FormattedText(spaceBookend + " " + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1); // normal space by itself outputs inaccurate width of 0
+            var spaceFmtted = new FormattedText("\u00A0", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1); // provides accurate width
+            var thinSpaceFmtted = new FormattedText(spaceBookend + "\u2009" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
+            var hairSpaceFmtted = new FormattedText(spaceBookend + "\u200A" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
+            //var thinSpaceFmtted = new FormattedText("\u2009", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1); // outputs inaccurate width of 0
+            //var hairSpaceFmtted = new FormattedText("\u200A", CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1); // does provide accurate width
+            var emDot33SpaceFmtted = new FormattedText(spaceBookend + "\u2004" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
+            var emDot25SpaceFmtted = new FormattedText(spaceBookend + "\u2005" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
+            var emDot1666SpaceFmtted = new FormattedText(spaceBookend + "\u2006" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
+            var punctSpaceFmtted = new FormattedText(spaceBookend + "\u2008" + spaceBookend, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, typeface, fontSize * (96.0 / 72.0), Brushes.Black, 1);
             var spaceBookendWidth = spaceBookendFmtted.Width;
             //var spaceWidth = spaceFmtted.Width - spaceBookendWidth - spaceBookendWidth;
             var spaceWidth = spaceFmtted.Width;
