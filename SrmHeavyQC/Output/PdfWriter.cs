@@ -64,8 +64,8 @@ namespace SrmHeavyQC.Output
             var plotSizeMultiplier = 3d;
             if (useNonVectorImages)
             {
-                summaryPlotCreateMethod = CreatePlotPng;
-                plotCreateMethod = CreatePlotPng;
+                summaryPlotCreateMethod = CreatePlotBitmapWpf;
+                plotCreateMethod = CreatePlotBitmapWpf;
                 // Plot text is naturally larger in OxyPlot.WPF-rendered images, so increase the size multiplier
                 plotSizeMultiplier = 4;
             }
@@ -288,7 +288,7 @@ namespace SrmHeavyQC.Output
         /// <param name="height"></param>
         /// <param name="resolution"></param>
         /// <returns></returns>
-        private XImage CreatePlotPng(CompoundData result, int width, int height, int resolution = 96)
+        private XImage CreatePlotBitmapWpf(CompoundData result, int width, int height, int resolution = 96)
         {
             var plot = Plotting.CreateCompoundPlot(result);
             var bitmap = Plotting.ConvertToBitmapImage(plot, width, height, resolution);
@@ -305,7 +305,7 @@ namespace SrmHeavyQC.Output
         /// <param name="height"></param>
         /// <param name="resolution"></param>
         /// <returns></returns>
-        private XImage CreatePlotPng(List<CompoundData> results, int width, int height, int resolution = 96)
+        private XImage CreatePlotBitmapWpf(List<CompoundData> results, int width, int height, int resolution = 96)
         {
             var plot = Plotting.CreatePlot(results, DatasetName);
             var bitmap = Plotting.ConvertToBitmapImage(plot, width, height, resolution);
