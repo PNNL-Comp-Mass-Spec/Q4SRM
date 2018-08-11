@@ -23,18 +23,5 @@ namespace Q4SRMui
         {
             InitializeComponent();
         }
-
-        /// <summary>
-        /// Event handler that is triggered on application start up.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void ApplicationStartup(object sender, StartupEventArgs e)
-        {
-            var mainWindow = new MainWindow();
-            var mainWindowVm = new MainWindowViewModel();
-            mainWindow.DataContext = mainWindowVm;
-            mainWindow.Show();
-        }
     }
 }

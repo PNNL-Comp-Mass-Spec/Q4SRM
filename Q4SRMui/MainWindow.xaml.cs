@@ -22,6 +22,7 @@ namespace Q4SRMui
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = new MainWindowViewModel();
         }
 
         private void Close_OnClick(object sender, RoutedEventArgs e)

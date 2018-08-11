@@ -1,0 +1,3 @@
+Source code pulled from https://github.com/aybe/Windows-API-Code-Pack-1.1
+
+Changes were made to create a folder browser that could show files as well, but does allow opening folders with the help of an extra button.

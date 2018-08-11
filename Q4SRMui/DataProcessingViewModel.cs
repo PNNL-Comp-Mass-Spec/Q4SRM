@@ -143,10 +143,13 @@ namespace Q4SRMui
 
         private async Task BrowseForFolder()
         {
-            var dialog = new CommonOpenFileDialog
+            var dialog = new CommonOpenFolderDialog
             {
-                IsFolderPicker = true,
+                //IsFolderPicker = true,
+                ShowFiles = true,
             };
+
+            dialog.Filters.Add(new CommonFileDialogFilter("Thermo .raw files", "*.raw"));
 
             if (!string.IsNullOrWhiteSpace(WorkFolder) && Directory.Exists(WorkFolder))
             {
@@ -157,9 +160,9 @@ namespace Q4SRMui
             if (result == CommonFileDialogResult.Ok)
             {
                 var folder = dialog.FileName;
-                if (folder.ToLower().EndsWith(".d"))
+                if (File.Exists(folder))
                 {
-                    folder = Path.GetDirectoryName(folder);
+                    folder = Path.GetDirectoryName(Path.GetFullPath(folder));
                 }
 
                 WorkFolder = folder;
