@@ -12,7 +12,6 @@ namespace Q4SRMui
     public class GuiOptions : ReactiveObject, IOptions
     {
         public const string SummaryStatsFileDefaultName = "HeavySummary.tsv";
-        private string rawFilePath;
         private double defaultThreshold;
         private double edgeNETThresholdMinutes;
         private double elutionConcurrenceThresholdMinutes;
@@ -28,12 +27,6 @@ namespace Q4SRMui
         private string compoundThresholdOutputFilePath;
         private string summaryStatsFilePath;
         private Plotting.ExportFormat imageSaveFormat;
-
-        public string RawFilePath
-        {
-            get { return rawFilePath; }
-            set { this.RaiseAndSetIfChanged(ref rawFilePath, value); }
-        }
 
         public double DefaultIntensityThreshold
         {
@@ -142,20 +135,15 @@ namespace Q4SRMui
 
         public GuiOptions()
         {
-            RawFilePath = "";
             CompoundThresholdFilePath = "";
-            DefaultIntensityThreshold = 10000;
-            EdgeNETThresholdMinutes = 0.5;
-            ElutionConcurrenceThresholdMinutes = 0.1;
-            SignalToNoiseHeuristicThreshold = 10;
             MaxThreads = SystemInfo.GetCoreCount();
             UseOutputFolder = false;
             UseCompoundThresholdsFile = false;
             MaxThreadsUsable = SystemInfo.GetLogicalCoreCount();
             CreateThresholdsFile = false;
-            CreatedThresholdsFileThresholdLevel = 0.50;
             SummaryStatsFilePath = SummaryStatsFileDefaultName;
             ImageSaveFormat = Plotting.ExportFormat.PNG;
+            this.SetDefaults();
         }
 
         /// <summary>

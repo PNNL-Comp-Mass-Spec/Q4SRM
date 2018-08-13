@@ -68,17 +68,13 @@ namespace Q4SRMcmd
         {
             RawFilePath = "";
             CompoundThresholdFilePath = "";
-            DefaultIntensityThreshold = 10000;
-            EdgeNETThresholdMinutes = 0.5;
-            ElutionConcurrenceThresholdMinutes = 0.1;
-            SignalToNoiseHeuristicThreshold = 10;
             FilesToProcessList = new List<string>();
             Recurse = false;
             FileFilter = "*.raw";
             MaxThreads = 0;
             OverwriteOutput = false;
-            CreatedThresholdsFileThresholdLevel = 0.50;
             ImageSaveFormat = Plotting.ExportFormat.PNG;
+            this.SetDefaults();
         }
 
         public bool Validate()

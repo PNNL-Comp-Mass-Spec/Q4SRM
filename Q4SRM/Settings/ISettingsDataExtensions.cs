@@ -9,6 +9,14 @@ namespace Q4SRM.Settings
 {
     public static class ISettingsDataExtensions
     {
+        public static void SetDefaultThresholds(this ISettingsData settings)
+        {
+            settings.DefaultIntensityThreshold = 10000;
+            settings.EdgeNETThresholdMinutes = 0.5;
+            settings.ElutionConcurrenceThresholdMinutes = 0.5;
+            settings.SignalToNoiseHeuristicThreshold = 10;
+        }
+
         public static void ComputeSha1(this ISettingsData settings)
         {
             if (string.IsNullOrWhiteSpace(settings.CompoundThresholdFilePath) || !File.Exists(settings.CompoundThresholdFilePath))

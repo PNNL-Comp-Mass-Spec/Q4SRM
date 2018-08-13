@@ -65,6 +65,7 @@
     <Compile Include="Output\DecimalLimitingDoubleTypeConverter.cs" />
     <Compile Include="Output\PdfWriter.cs" />
     <Compile Include="Output\Plotting.cs" />
+    <Compile Include="Settings\IOptionsExtensions.cs" />
     <Compile Include="Settings\SettingsData.cs" />
     <Compile Include="Settings\IOptions.cs" />
     <Compile Include="Settings\ISettingsDataExtensions.cs" />

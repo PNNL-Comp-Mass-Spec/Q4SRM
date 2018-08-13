@@ -5,8 +5,6 @@ namespace Q4SRM.Settings
 {
     public interface IOptions : ISettingsData
     {
-        string RawFilePath { get; }
-
         string OutputFolder { get; }
 
         int MaxThreads { get; }
@@ -17,7 +15,7 @@ namespace Q4SRM.Settings
 
         bool CreateThresholdsFile { get; }
 
-        double CreatedThresholdsFileThresholdLevel { get; }
+        double CreatedThresholdsFileThresholdLevel { get; set; }
 
         string CompoundThresholdOutputFilePath { get; }
 
