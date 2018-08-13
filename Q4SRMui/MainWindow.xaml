@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Q4SRMui"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance {x:Type local:MainWindowViewModel}, IsDesignTimeCreatable=True}"
-        Title="SRM Heavy QC Processor" Height="650" Width="800">
+        Title="Q4SRM" Height="650" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="1*" MinHeight="200" />
