@@ -78,7 +78,7 @@ namespace Q4SRM.Output
             currentPageY += AddText(DatasetName, fontHeader, 0.75, position: XStringFormats.BaseLineCenter);
 
             // Add the analysis settings
-            currentPageY += AddText("QC Analysis settings:", fontHeader2);
+            currentPageY += AddText("Q4SRM Analysis settings:", fontHeader2);
             currentPageY += AddText($"Input file path: {DatasetPath}", fontDefault);
             currentPageY += AddText($"Compound minimum summed intensity threshold: {settings.DefaultIntensityThreshold:F0}", fontDefault);
             currentPageY += AddText($"Compound peak elution concurrence threshold (minutes): {settings.ElutionConcurrenceThresholdMinutes:F2}", fontDefault);
