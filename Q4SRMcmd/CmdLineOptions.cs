@@ -26,10 +26,10 @@ namespace Q4SRMcmd
         [Option("m", Required = false, HelpText = "Time (in minutes) that a peak must be away from the edge of the target window for it to be considered \"passing\"", Min = 0)]
         public double EdgeNETThresholdMinutes { get; set; }
 
-        [Option("ec", Required = false, HelpText = "Threshold (in minutes) for elution concurrence of the transition peaks for the same compound; smaller is stricter.")]
+        [Option("ec", Required = false, HelpText = "Threshold (in minutes) for elution concurrence of the transition peaks for the same compound; smaller is stricter.", Min = 0)]
         public double ElutionConcurrenceThresholdMinutes { get; set; }
 
-        [Option("sn", Required = false, HelpText = "Threshold for the Signal-to-Noise heuristic; larger is stricter; value is calculated as max intensity / median intensity")]
+        [Option("sn", Required = false, HelpText = "Threshold for the Signal-to-Noise heuristic; larger is stricter; value is calculated as max intensity / median intensity", Min = 1)]
         public double SignalToNoiseHeuristicThreshold { get; set; }
 
         [Option("tpc", Required = false, HelpText = "A TSV file with compound and threshold columns, for custom thresholds for the specified compounds")]

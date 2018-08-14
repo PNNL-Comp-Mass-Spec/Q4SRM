@@ -96,7 +96,7 @@ namespace Q4SRMui
                 return;
             }
 
-            DataPlot = Plotting.CreatePlot(results, Path.GetFileName(ResultsFilePath));
+            DataPlot = Plotting.CreatePlot(results, Path.GetFileName(ResultsFilePath), Plotting.ExportFormat.PNG);
         }
     }
 }
