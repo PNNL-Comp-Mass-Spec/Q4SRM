@@ -11,7 +11,7 @@ namespace Q4SRMui
 {
     public class GuiOptions : ReactiveObject, IOptions
     {
-        public const string SummaryStatsFileDefaultName = "HeavySummary.tsv";
+        public const string SummaryStatsFileDefaultName = "Q4SRMSummary.tsv";
         private double defaultThreshold;
         private double edgeNETThresholdMinutes;
         private double elutionConcurrenceThresholdMinutes;

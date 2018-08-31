@@ -9,7 +9,7 @@ namespace Q4SRMcmd
 {
     public class CmdLineOptions : IOptions
     {
-        private const string SummaryStatsFileDefaultName = "HeavySummary.tsv";
+        private const string SummaryStatsFileDefaultName = "Q4SRMSummary.tsv";
 
         [Option("raw", Required = true, HelpShowsDefault = false, HelpText = "Path to .raw file, or directory containing .raw files")]
         public string RawFilePath { get; set; }
@@ -55,7 +55,7 @@ namespace Q4SRMcmd
 
         public string CompoundThresholdFileSha1Hash { get; set; }
 
-        [Option("summaryPath", Required = false, HelpText = "Path where processing summary tsv should be written. Default is [out folder/raw file folder]\\HeavySummary.tsv", HelpShowsDefault = false)]
+        [Option("summaryPath", Required = false, HelpText = "Path where processing summary tsv should be written. Default is [out folder/raw file folder]\\Q4SRMSummary.tsv", HelpShowsDefault = false)]
         public string SummaryStatsFilePath { get; set; }
 
         [Option("img", Required = false, HelpText = "Format for the saved total intensity vs. time plot")]

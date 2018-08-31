@@ -151,6 +151,10 @@ namespace Q4SRM
             foreach (var dataset in options.FilesToProcess)
             {
                 var resultFilePath = GetOutputFileForDataset(options, dataset);
+                if (!File.Exists(resultFilePath))
+                {
+                    continue;
+                }
                 var results = CompoundData.ReadCombinedResultsFile(resultFilePath).ToList();
                 var datasetName = Path.GetFileName(dataset);
 
