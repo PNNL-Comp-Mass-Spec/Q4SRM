@@ -42,7 +42,7 @@ namespace Q4SRM
 
         private string GetOutputFileForDataset(IOptions options, string rawFilePath)
         {
-            var outputFileName = Path.GetFileNameWithoutExtension(rawFilePath) + "_heavyPeaks.tsv";
+            var outputFileName = Path.GetFileNameWithoutExtension(rawFilePath) + "_Q4SRM.tsv";
             var outputFolder = Path.GetDirectoryName(rawFilePath);
             if (!string.IsNullOrWhiteSpace(options.OutputFolder))
             {
