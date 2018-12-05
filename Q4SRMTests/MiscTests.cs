@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Q4SRM.Data;
+using Q4SRM.Output;
 using Q4SRM.Settings;
 
 namespace Q4SRMTests
@@ -19,6 +21,15 @@ namespace Q4SRMTests
             Console.WriteLine("DefaultThreshold: {0}", settings.DefaultIntensityThreshold);
             Console.WriteLine("CompoundThresholdFilePath: {0}", settings.CompoundThresholdFilePath);
             Console.WriteLine("CompoundThresholdFileSha1Hash: {0}", settings.CompoundThresholdFileSha1Hash);
+        }
+
+        [Test]
+        public void TestPdf()
+        {
+            var datasetName = "Rush2_p14RR_62_26Oct17_Smeagol-WRUSHCol3_75x20a";
+            var filePath = @"E:\SRM_data\Rush2_p14RR_62_26Oct17_Smeagol-WRUSHCol3_75x20a_Q4SRM.pdf";
+            var writer = new PdfWriter(datasetName, datasetName, filePath);
+            writer.WritePdf(new List<CompoundData>(), new SettingsData());
         }
 
         [Test]

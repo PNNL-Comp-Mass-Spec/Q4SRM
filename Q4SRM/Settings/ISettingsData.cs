@@ -15,5 +15,7 @@
         string CompoundThresholdFilePath { get; set; }
 
         string CompoundThresholdFileSha1Hash { get; set; }
+
+        bool CheckAllCompounds { get; set; }
     }
 }

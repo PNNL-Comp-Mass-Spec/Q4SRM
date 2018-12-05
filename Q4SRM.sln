@@ -18,6 +18,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermo_RawFileReader", "ReaderPlugins\Thermo_RawFileReader\Thermo_RawFileReader.csproj", "{A57FBCEA-8C52-40C2-AD3E-368090F786A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MzMLReader", "ReaderPlugins\MzMLReader\MzMLReader.csproj", "{B52B777B-326A-443B-8B0B-FA4BD7B1A8CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReaderPlugins", "ReaderPlugins", "{609D2CCD-14EF-4B0D-9086-6F2A51504484}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thermo_MsFileReader", "ReaderPlugins\Thermo_MsFileReader\Thermo_MsFileReader.csproj", "{DED8CF70-DA82-4C1D-A25D-9B4B5AC0272B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgilentReader", "ReaderPlugins\AgilentReader\AgilentReader.csproj", "{8846B169-3561-41B5-848B-C9FA9A8B24AF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,9 +50,31 @@ Global
 		{C40F8715-22B8-4127-9625-D8AE772FAECF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C40F8715-22B8-4127-9625-D8AE772FAECF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C40F8715-22B8-4127-9625-D8AE772FAECF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A57FBCEA-8C52-40C2-AD3E-368090F786A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A57FBCEA-8C52-40C2-AD3E-368090F786A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A57FBCEA-8C52-40C2-AD3E-368090F786A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A57FBCEA-8C52-40C2-AD3E-368090F786A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B52B777B-326A-443B-8B0B-FA4BD7B1A8CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B52B777B-326A-443B-8B0B-FA4BD7B1A8CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B52B777B-326A-443B-8B0B-FA4BD7B1A8CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B52B777B-326A-443B-8B0B-FA4BD7B1A8CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DED8CF70-DA82-4C1D-A25D-9B4B5AC0272B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DED8CF70-DA82-4C1D-A25D-9B4B5AC0272B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DED8CF70-DA82-4C1D-A25D-9B4B5AC0272B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DED8CF70-DA82-4C1D-A25D-9B4B5AC0272B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8846B169-3561-41B5-848B-C9FA9A8B24AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8846B169-3561-41B5-848B-C9FA9A8B24AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8846B169-3561-41B5-848B-C9FA9A8B24AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8846B169-3561-41B5-848B-C9FA9A8B24AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A57FBCEA-8C52-40C2-AD3E-368090F786A6} = {609D2CCD-14EF-4B0D-9086-6F2A51504484}
+		{B52B777B-326A-443B-8B0B-FA4BD7B1A8CF} = {609D2CCD-14EF-4B0D-9086-6F2A51504484}
+		{DED8CF70-DA82-4C1D-A25D-9B4B5AC0272B} = {609D2CCD-14EF-4B0D-9086-6F2A51504484}
+		{8846B169-3561-41B5-848B-C9FA9A8B24AF} = {609D2CCD-14EF-4B0D-9086-6F2A51504484}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {55DC1014-00BB-47B8-A061-DF127B33EAEB}

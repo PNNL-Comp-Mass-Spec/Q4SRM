@@ -44,6 +44,10 @@ namespace Q4SRMui
             DatasetPath = path;
             DatasetFolder = Path.GetDirectoryName(path);
             DatasetName = Path.GetFileNameWithoutExtension(path);
+            if (path.EndsWith(".gz", StringComparison.OrdinalIgnoreCase))
+            {
+                DatasetName = Path.GetFileNameWithoutExtension(DatasetName);
+            }
         }
 
         [Obsolete("For WPF design time use only", true)]

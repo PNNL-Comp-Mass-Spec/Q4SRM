@@ -15,6 +15,7 @@ namespace Q4SRM.Settings
             settings.EdgeNETThresholdMinutes = 0.5;
             settings.ElutionConcurrenceThresholdMinutes = 0.5;
             settings.SignalToNoiseHeuristicThreshold = 10;
+            settings.CheckAllCompounds = false;
         }
 
         public static void ComputeSha1(this ISettingsData settings)

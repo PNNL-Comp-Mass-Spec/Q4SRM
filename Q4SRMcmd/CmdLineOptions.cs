@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using PRISM;
+using Q4SRM.DataReaders;
 using Q4SRM.Output;
 using Q4SRM.Settings;
 
@@ -19,6 +22,9 @@ namespace Q4SRMcmd
 
         [Option("filter", Required = false, HelpText = "If raw file path is a folder, a file filter string (supports '*' wildcard)")]
         public string FileFilter { get; set; }
+
+        [Option("method", Required = false, HelpText = "For mzML files, the method file path", HelpShowsDefault = false)]
+        public string MethodFilePath { get; set; }
 
         [Option("t", Required = false, HelpText = "Peak area threshold for a compound to be considered \"passing\"", Min = 0)]
         public double DefaultIntensityThreshold { get; set; }
@@ -61,16 +67,20 @@ namespace Q4SRMcmd
         [Option("img", Required = false, HelpText = "Format for the saved total intensity vs. time plot")]
         public Plotting.ExportFormat ImageSaveFormat { get; set; }
 
+        [Option("all", Required = false, HelpText = "If specified, metrics are computed for all compounds in the file (not just heavy compounds)")]
+        public bool CheckAllCompounds { get; set; }
+
         public List<string> FilesToProcessList { get; }
         public IList<string> FilesToProcess => FilesToProcessList;
 
         public CmdLineOptions()
         {
             RawFilePath = "";
+            MethodFilePath = "";
             CompoundThresholdFilePath = "";
             FilesToProcessList = new List<string>();
             Recurse = false;
-            FileFilter = "*.raw";
+            FileFilter = "";
             MaxThreads = 0;
             OverwriteOutput = false;
             ImageSaveFormat = Plotting.ExportFormat.PNG;
@@ -79,7 +89,35 @@ namespace Q4SRMcmd
 
         public bool Validate()
         {
-            if (RawFilePath.ToLower().EndsWith(".raw"))
+            var paths = ReaderLoader.GetDatasetPathsInPath(RawFilePath, Recurse);
+            if (!string.IsNullOrWhiteSpace(FileFilter))
+            {
+                // match the filter; replace "." with "\.", "*" with ".*", and "?" with ".", and use compiled regex.
+                var regexFilterString = FileFilter.Replace(".", @"\.").Replace("*", ".*").Replace("?", ".");
+                var regexFilter = new Regex(regexFilterString, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+                FilesToProcessList.AddRange(paths.Where(x => regexFilter.IsMatch(Path.GetFileName(x))));
+            }
+            else
+            {
+                FilesToProcessList.AddRange(paths);
+            }
+
+            if (FilesToProcessList.Count == 0)
+            {
+                Console.WriteLine("ERROR: Cannot process file \"{0}\"! (No files to process)", RawFilePath);
+                return false;
+            }
+
+            if (FilesToProcessList.Any(x =>
+                    x.EndsWith("mzml", StringComparison.OrdinalIgnoreCase) || x.EndsWith("mzml.gz", StringComparison.OrdinalIgnoreCase)) &&
+                string.IsNullOrWhiteSpace(MethodFilePath) || !File.Exists(MethodFilePath))
+            {
+                Console.WriteLine("ERROR: Method file required for mzML files.");
+                return false;
+            }
+
+            /*if (RawFilePath.ToLower().EndsWith(".raw"))
             {
                 if (!File.Exists(RawFilePath))
                 {
@@ -104,7 +142,7 @@ namespace Q4SRMcmd
             {
                 Console.WriteLine("ERROR: Cannot process file \"{0}\"!", RawFilePath);
                 return false;
-            }
+            }*/
 
             if (!string.IsNullOrWhiteSpace(CompoundThresholdFilePath) && !File.Exists(CompoundThresholdFilePath))
             {

@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Q4SRM.Data;
+using Q4SRM.DataReaders;
 using Q4SRM.Output;
-using Q4SRM.RawFileIO;
 using Q4SRM.Settings;
 
 namespace Q4SRM
@@ -68,55 +68,58 @@ namespace Q4SRM
 
             Console.WriteLine("Processing file \"{0}\"", rawFilePath);
             statusUpdate?.Invoke($"Processing file \"{rawFilePath}\"");
-            using (var rawReader = new XCalDataReader(rawFilePath))
+
+            var instanceCreator = ReaderLoader.GetReaderForFile(rawFilePath);
+            var rawReader = instanceCreator.CreateSpectraReader(rawFilePath);
+            var methodReader = instanceCreator.CreateMethodReader(rawFilePath, options.MethodFilePath);
+            var compounds = methodReader.ReadMethodData(options);
+            var results = rawReader.ReadSpectraData(compounds);
+            if (results == null)
             {
-                var results = rawReader.ReadRawData(options);
-                if (results == null)
-                {
-                    return;
-                }
-                //Console.WriteLine("File \"{0}\": RawResults: {1}", rawFilePath, results.Count);
-                //var combined = rawReader.AggregateResults(results, options.DefaultThreshold, CompoundThresholdsLookup);
-                //Console.WriteLine("File \"{0}\": CombinedResults: {1}", rawFilePath, combined.Count);
-
-                CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
-                Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), Path.ChangeExtension(outputFilePath, null) + "_summary", options.ImageSaveFormat);
-                var pdfPath = Path.ChangeExtension(outputFilePath, "pdf");
-                var pdfWriter = new PdfWriter(Path.GetFileNameWithoutExtension(rawFilePath), rawFilePath, pdfPath);
-                pdfWriter.WritePdf(results, options);
-
-                /*/
-                var imagesDir = Path.ChangeExtension(outputFilePath, null) + "_images";
-                if (!Directory.Exists(imagesDir))
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(imagesDir);
-                    }
-                    catch { }
-                }
-
-                if (Directory.Exists(imagesDir))
-                {
-                    foreach (var compound in results)
-                    {
-                        // replace invalid characters with underscores
-                        var name = Path.GetInvalidFileNameChars().Aggregate(compound.CompoundName, (current, c) => current.Replace(c.ToString(), "_"));
-                        var namePrefix = (compound.PassesAllThresholds
-                                             ? "P"
-                                             : GetCompoundDataPrefix(compound)) + "_";
-                        var pathBase = Path.Combine(imagesDir, namePrefix + name);
-                        Plotting.PlotCompound(compound, pathBase + ".png", Plotting.ExportFormat.PDF);
-
-                        foreach (var transition in compound.Transitions)
-                        {
-                            var path = $"{pathBase}_{transition.ProductMz:F2}.png";
-                            Plotting.PlotTransition(transition, path, Plotting.ExportFormat.PDF);
-                        }
-                    }
-                }
-                /**/
+                return;
             }
+            //Console.WriteLine("File \"{0}\": RawResults: {1}", rawFilePath, results.Count);
+            //var combined = rawReader.AggregateResults(results, options.DefaultThreshold, CompoundThresholdsLookup);
+            //Console.WriteLine("File \"{0}\": CombinedResults: {1}", rawFilePath, combined.Count);
+
+            CompoundData.WriteCombinedResultsToFile(outputFilePath, results, options);
+            Plotting.PlotResults(results, Path.GetFileNameWithoutExtension(rawFilePath), Path.ChangeExtension(outputFilePath, null) + "_summary", options.ImageSaveFormat);
+            var pdfPath = Path.ChangeExtension(outputFilePath, "pdf");
+            var pdfWriter = new PdfWriter(Path.GetFileNameWithoutExtension(rawFilePath), rawFilePath, pdfPath);
+            pdfWriter.WritePdf(results, options);
+
+            /*//////
+            var imagesDir = Path.ChangeExtension(outputFilePath, null) + "_images";
+            if (!Directory.Exists(imagesDir))
+            {
+                try
+                {
+                    Directory.CreateDirectory(imagesDir);
+                }
+                catch { }
+            }
+
+            if (Directory.Exists(imagesDir))
+            {
+                foreach (var compound in results)
+                {
+                    // replace invalid characters with underscores
+                    var name = Path.GetInvalidFileNameChars().Aggregate(compound.CompoundName, (current, c) => current.Replace(c.ToString(), "_"));
+                    var namePrefix = (compound.PassesAllThresholds
+                                         ? "P"
+                                         : GetCompoundDataPrefix(compound)) + "_";
+                    var pathBase = Path.Combine(imagesDir, namePrefix + name);
+                    Plotting.PlotCompound(compound, pathBase + ".png", Plotting.ExportFormat.PDF);
+
+                    foreach (var transition in compound.Transitions)
+                    {
+                        var path = $"{pathBase}_{transition.ProductMz:F2}.png";
+                        Plotting.PlotTransition(transition, path, Plotting.ExportFormat.PDF);
+                    }
+                }
+            }
+            /**/
+
             Console.WriteLine("Finished Processing file \"{0}\"", rawFilePath);
             statusUpdate?.Invoke($"Finished Processing file \"{rawFilePath}\"");
         }

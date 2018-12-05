@@ -11,6 +11,8 @@ namespace Q4SRM.Settings
 
         IList<string> FilesToProcess { get; }
 
+        string MethodFilePath { get; }
+
         bool OverwriteOutput { get; }
 
         bool CreateThresholdsFile { get; }

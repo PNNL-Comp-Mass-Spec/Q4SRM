@@ -442,6 +442,7 @@ namespace Q4SRM.Output
                     break;
             }
 
+            // TODO: Update this for the newer metrics and names
             var trackerFormatString = $"Compound: {{{nameof(CompoundData.CompoundName)}}}\nStart time: {{{nameof(CompoundData.StartTimeMinutes)}}}\nStop Time: {{{nameof(CompoundData.StopTimeMinutes)}}}\nTotal Abundance: {{{nameof(CompoundData.TotalIntensitySum)}}}\nMax Intensity: {{{nameof(CompoundData.MaxIntensity)}}}\nMax Intensity NET: {{{nameof(CompoundData.MaxIntensityNet)}}}";
             var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((CompoundData)x).ElutionTimeMidpoint, ((CompoundData)x).TotalIntensitySum));
 

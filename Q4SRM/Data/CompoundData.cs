@@ -54,6 +54,11 @@ namespace Q4SRM.Data
             Transitions = new List<TransitionData>(10);
         }
 
+        public override string ToString()
+        {
+            return $"{CompoundName,-50} {PrecursorMz,12:F4} {StartTimeMinutes,12:F4} {StopTimeMinutes,12:F4}";
+        }
+
         public CompoundData()
         {
             Transitions = new List<TransitionData>(10);

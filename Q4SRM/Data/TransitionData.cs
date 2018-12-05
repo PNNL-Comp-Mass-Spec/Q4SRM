@@ -83,7 +83,7 @@ namespace Q4SRM.Data
 
         public override string ToString()
         {
-            return $"{CompoundName,-50} {PrecursorMz,10:F2} {ProductMz,10:F2} {StartTimeMinutes,10:F2} {StopTimeMinutes,10:F2}";
+            return $"{CompoundName,-50} {PrecursorMz,12:F4} {ProductMz,12:F4} {StartTimeMinutes,12:F4} {StopTimeMinutes,12:F4}";
         }
 
         public static IEnumerable<TransitionData> ParseSrmTable(Stream stream)

@@ -4,18 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DD526CA6-4787-42E2-846F-34818CD0AE62}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Q4SRMcmd</RootNamespace>
-    <AssemblyName>Q4SRMcmd</AssemblyName>
+    <ProjectGuid>{B52B777B-326A-443B-8B0B-FA4BD7B1A8CF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MzMLReader</RootNamespace>
+    <AssemblyName>MzMLReader</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WarningLevel>4</WarningLevel>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,56 +21,46 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>Q4SRMcmd.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CmdLineOptions.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="InstanceCreator.cs" />
+    <Compile Include="MzMLSpectrumReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="PRISM-Library">
-      <Version>2.5.8</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Q4SRM\Q4SRM.csproj">
+    <ProjectReference Include="..\..\Q4SRM\Q4SRM.csproj">
       <Project>{d57ce760-06ea-4312-a5c5-c07308253047}</Project>
       <Name>Q4SRM</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ReaderPlugins\MzMLReader\MzMLReader.csproj">
-      <Project>{b52b777b-326a-443b-8b0b-fa4bd7b1a8cf}</Project>
-      <Name>MzMLReader</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ReaderPlugins\Thermo_RawFileReader\Thermo_RawFileReader.csproj">
-      <Project>{a57fbcea-8c52-40c2-ad3e-368090f786a6}</Project>
-      <Name>Thermo_RawFileReader</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="PSI_Interface">
+      <Version>1.3.28</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y /f /d "$(SolutionDir)Lib\ThermoFisher.*.dll" "$(TargetDir)"
-REM xcopy /y /f /d "$(SolutionDir)Lib\ThermoRawFileReader.*.dll" "$(TargetDir)"
-REM xcopy /y /f /d "$(SolutionDir)PluginDLLs\$(ConfigurationName)\*.dll" "$(TargetDir)"
+    <PostBuildEvent>if not exist "$(SolutionDir)pluginDLLs\$(ConfigurationName)" mkdir "$(SolutionDir)pluginDLLs\$(ConfigurationName)"
+xcopy /y /f /d "$(TargetPath)" "$(SolutionDir)pluginDLLs\$(ConfigurationName)\"
+xcopy /y /f /d "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)pluginDLLs\$(ConfigurationName)\"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

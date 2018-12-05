@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reactive.Concurrency;
 using PRISM;
 using Q4SRM.Output;
@@ -12,6 +13,7 @@ namespace Q4SRMui
     public class GuiOptions : ReactiveObject, IOptions
     {
         public const string SummaryStatsFileDefaultName = "Q4SRMSummary.tsv";
+        private string methodFilePath;
         private double defaultThreshold;
         private double edgeNETThresholdMinutes;
         private double elutionConcurrenceThresholdMinutes;
@@ -27,6 +29,13 @@ namespace Q4SRMui
         private string compoundThresholdOutputFilePath;
         private string summaryStatsFilePath;
         private Plotting.ExportFormat imageSaveFormat;
+        private bool checkAllCompounds;
+
+        public string MethodFilePath
+        {
+            get { return methodFilePath; }
+            set { this.RaiseAndSetIfChanged(ref methodFilePath, value); }
+        }
 
         public double DefaultIntensityThreshold
         {
@@ -126,6 +135,12 @@ namespace Q4SRMui
             set { this.RaiseAndSetIfChanged(ref imageSaveFormat, value); }
         }
 
+        public bool CheckAllCompounds
+        {
+            get { return checkAllCompounds; }
+            set { this.RaiseAndSetIfChanged(ref checkAllCompounds, value); }
+        }
+
         public List<string> FilesToProcessList { get; } = new List<string>();
         public int MaxThreadsUsable { get; }
 
@@ -143,6 +158,7 @@ namespace Q4SRMui
             CreateThresholdsFile = false;
             SummaryStatsFilePath = SummaryStatsFileDefaultName;
             ImageSaveFormat = Plotting.ExportFormat.PNG;
+
             this.SetDefaults();
         }
 
@@ -196,6 +212,13 @@ namespace Q4SRMui
 
         public string Validate()
         {
+            if (FilesToProcessList.Any(x =>
+                    x.EndsWith("mzml", StringComparison.OrdinalIgnoreCase) || x.EndsWith("mzml.gz", StringComparison.OrdinalIgnoreCase)) &&
+                string.IsNullOrWhiteSpace(MethodFilePath) || !File.Exists(MethodFilePath))
+            {
+                return "ERROR: Method file required for mzML files.";
+            }
+
             if (UseCompoundThresholdsFile && !string.IsNullOrWhiteSpace(CompoundThresholdFilePath) && !File.Exists(CompoundThresholdFilePath))
             {
                 return $"ERROR: Custom compound threshold file \"{CompoundThresholdFilePath}\" does not exist!";

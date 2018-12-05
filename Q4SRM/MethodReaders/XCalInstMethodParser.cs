@@ -5,11 +5,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Q4SRM.Data;
 
-namespace Q4SRM.RawFileIO
+namespace Q4SRM.MethodReaders
 {
-    public class XCalInstMethod
+    public class XCalInstMethodParser
     {
-        public XCalInstMethod(string method)
+        public XCalInstMethodParser(string method)
         {
             DirtyMethod = method;
             UsesCompoundName = false;

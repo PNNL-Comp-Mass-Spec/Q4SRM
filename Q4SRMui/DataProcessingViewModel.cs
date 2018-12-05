@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Q4SRM;
+using Q4SRM.DataReaders;
 using Q4SRM.Output;
 using ReactiveUI;
 
@@ -74,6 +75,7 @@ namespace Q4SRMui
         public ReactiveCommand<Unit, Unit> MoveToQueueCommand { get; }
         public ReactiveCommand<Unit, Unit> RemoveFromQueueCommand { get; }
         public ReactiveCommand<Unit, Unit> BrowseForOutputFolderCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseForMethodFileCommand { get; }
         public ReactiveCommand<Unit, Unit> BrowseForStatsFileCommand { get; }
         public ReactiveCommand<Unit, Unit> BrowseForThresholdsFileCommand { get; }
         public ReactiveCommand<Unit, Unit> BrowseForThresholdsOutputFileCommand { get; }
@@ -97,11 +99,15 @@ namespace Q4SRMui
             MoveToQueueCommand = ReactiveCommand.Create(MoveToProcessingList, this.WhenAnyValue(x => x.AvailableDatasetsViewModel.SelectedData.Count).Select(x => x > 0));
             RemoveFromQueueCommand = ReactiveCommand.Create(RemoveFromProcessingList, this.WhenAnyValue(x => x.DatasetsToProcessViewModel.SelectedData.Count).Select(x => x > 0));
             BrowseForOutputFolderCommand = ReactiveCommand.Create(BrowseForOutputFolder);
+            BrowseForMethodFileCommand = ReactiveCommand.Create(BrowseForMethodFile);
             BrowseForStatsFileCommand = ReactiveCommand.Create(BrowseForStatsFile);
             BrowseForThresholdsFileCommand = ReactiveCommand.Create(BrowseForThresholdFile);
             BrowseForThresholdsOutputFileCommand = ReactiveCommand.Create(BrowseForThresholdOutputFilePath);
             ProcessDatasetsCommand = ReactiveCommand.CreateFromTask(ProcessDatasets, this.WhenAnyValue(x => x.AvailableDatasetsViewModel.Data.Count, x => x.DatasetsToProcessViewModel.Data.Count).Select(x => x.Item1 > 0 || x.Item2 > 0));
             CancelCommand = ReactiveCommand.Create(CancelProcessing, this.WhenAnyValue(x => x.IsNotRunning).Select(x => !x));
+
+            // Trigger the loading of plugins.
+            ReaderLoader.GetFilterSpecs();
 
             this.WhenAnyValue(x => x.WorkFolderRecurse, x => x.ExcludeArchived).Subscribe(async x => await LoadDatasets());
             IsNotRunning = true;
@@ -149,7 +155,19 @@ namespace Q4SRMui
                 ShowFiles = true,
             };
 
-            dialog.Filters.Add(new CommonFileDialogFilter("Thermo .raw files", "*.raw"));
+            var filterSpecs = ReaderLoader.GetFilterSpecs();
+            var supportedExtensions = string.Join(";", filterSpecs.Where(x => !x.IsFolderDataset).Select(x => x.WildcardSpec));
+            dialog.Filters.Add(new CommonFileDialogFilter("SRM datasets", supportedExtensions));
+            var folderDatasetTypes = filterSpecs.Where(x => x.IsFolderDataset).ToList();
+
+            dialog.FolderChanging += (sender, args) =>
+            {
+                if (folderDatasetTypes.Any(x => args.Folder.EndsWith(x.PathEnding, StringComparison.OrdinalIgnoreCase)))
+                {
+                    // Prevent navigating inside folder datasets
+                    args.Cancel = true;
+                }
+            };
 
             if (!string.IsNullOrWhiteSpace(WorkFolder) && Directory.Exists(WorkFolder))
             {
@@ -189,6 +207,22 @@ namespace Q4SRMui
 
                 Options.OutputFolder = folder;
                 Options.UseOutputFolder = true;
+            }
+        }
+
+        private void BrowseForMethodFile()
+        {
+            var dialog = new CommonOpenFileDialog
+            {
+                Filters = { new CommonFileDialogFilter("Method File TSV or CSV", ".txt;.tsv;.csv") }
+            };
+
+            var result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                var file = dialog.FileName;
+
+                Options.MethodFilePath = file;
             }
         }
 
@@ -272,8 +306,11 @@ namespace Q4SRMui
                 return new List<DatasetInfo>();
             }
 
+            /*
             var searchOption = WorkFolderRecurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
             var datasetPaths = Directory.EnumerateFiles(WorkFolder, "*.raw", searchOption);
+            */
+            var datasetPaths = ReaderLoader.GetDatasetPathsInPath(WorkFolder, WorkFolderRecurse);
 
             if (ExcludeArchived)
             {

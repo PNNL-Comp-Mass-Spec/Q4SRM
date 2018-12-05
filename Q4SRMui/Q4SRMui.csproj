@@ -104,6 +104,14 @@
       <Project>{d57ce760-06ea-4312-a5c5-c07308253047}</Project>
       <Name>Q4SRM</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ReaderPlugins\MzMLReader\MzMLReader.csproj">
+      <Project>{b52b777b-326a-443b-8b0b-fa4bd7b1a8cf}</Project>
+      <Name>MzMLReader</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReaderPlugins\Thermo_RawFileReader\Thermo_RawFileReader.csproj">
+      <Project>{a57fbcea-8c52-40c2-ad3e-368090f786a6}</Project>
+      <Name>Thermo_RawFileReader</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Extended.Wpf.Toolkit">
@@ -116,10 +124,10 @@
       <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="PRISM-Library">
-      <Version>2.4.92</Version>
+      <Version>2.5.8</Version>
     </PackageReference>
     <PackageReference Include="ReactiveUI.WPF">
-      <Version>8.4.4</Version>
+      <Version>8.7.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -143,6 +151,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y /f /d "$(SolutionDir)Lib\ThermoFisher.*.dll" "$(TargetDir)"
+REM xcopy /y /f /d "$(SolutionDir)Lib\ThermoRawFileReader.*.dll" "$(TargetDir)"
+REM xcopy /y /f /d "$(SolutionDir)PluginDLLs\$(ConfigurationName)\*.dll" "$(TargetDir)"
 
 rem Remove the Extended WPF Toolkit AvalonDock dlls and folders - using powershell for flexibility
 powershell.exe -NonInteractive -Command "&amp; { cd \"$(TargetDir)\\" ; ForEach ($file in (Get-ChildItem *.AvalonDock.* -Recurse)) { $dirName = $file.DirectoryName ; Remove-Item $file.FullName ; If ((Measure-Object -InputObject (Get-ChildItem $dirName\*)).Count -eq 0) { Remove-Item $dirName -Recurse }}}"
