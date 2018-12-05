@@ -22,6 +22,11 @@ namespace Thermo_MsFileReader
         public DatasetTypes SupportedDatasetTypes => DatasetTypes.ThermoRaw;
         public CanReadError CanReadDataset(string datasetPath)
         {
+            if (!XCaliburSpectrumReader.CheckDependencies())
+            {
+                return CanReadError.MissingDependency;
+            }
+
             if (datasetPath.EndsWith(".raw", StringComparison.OrdinalIgnoreCase) && File.Exists(datasetPath))
             {
                 return CanReadError.None;

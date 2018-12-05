@@ -213,8 +213,8 @@ namespace Q4SRMui
         public string Validate()
         {
             if (FilesToProcessList.Any(x =>
-                    x.EndsWith("mzml", StringComparison.OrdinalIgnoreCase) || x.EndsWith("mzml.gz", StringComparison.OrdinalIgnoreCase)) &&
-                string.IsNullOrWhiteSpace(MethodFilePath) || !File.Exists(MethodFilePath))
+                    x.EndsWith(".mzml", StringComparison.OrdinalIgnoreCase) || x.EndsWith(".mzml.gz", StringComparison.OrdinalIgnoreCase)) &&
+                (string.IsNullOrWhiteSpace(MethodFilePath) || !File.Exists(MethodFilePath)))
             {
                 return "ERROR: Method file required for mzML files.";
             }

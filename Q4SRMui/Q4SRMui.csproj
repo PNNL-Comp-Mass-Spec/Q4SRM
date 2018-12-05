@@ -108,6 +108,10 @@
       <Project>{b52b777b-326a-443b-8b0b-fa4bd7b1a8cf}</Project>
       <Name>MzMLReader</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ReaderPlugins\Thermo_MsFileReader\Thermo_MsFileReader.csproj">
+      <Project>{ded8cf70-da82-4c1d-a25d-9b4b5ac0272b}</Project>
+      <Name>Thermo_MsFileReader</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ReaderPlugins\Thermo_RawFileReader\Thermo_RawFileReader.csproj">
       <Project>{a57fbcea-8c52-40c2-ad3e-368090f786a6}</Project>
       <Name>Thermo_RawFileReader</Name>
