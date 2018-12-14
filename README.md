@@ -14,6 +14,6 @@ MzML files are also supported, with an additional tab-/comma-delimited method fi
 
 ## Minimum requirements
 Q4SRM is compiled against .NET 4.6.2, and uses Thermo's RawFileReader library. These lead to the following system requirements:
-* 64-bit OS (for Thermo .RAW); 32-bit OS is supported with mzML files.
+* 64-bit OS (for Thermo .RAW with RawFileReader); 32-bit OS is supported with mzML files, and is also supported for Thermo .RAW when 32-bit MSFileReader is installed.
 * Windows 7 SP1 or newer with .NET 4.6.2 or newer installed.
 * It is recommended that you have at least a dual-core CPU, and at least 4GB of memory.

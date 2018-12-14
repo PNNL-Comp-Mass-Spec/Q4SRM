@@ -23,7 +23,7 @@ namespace Q4SRMcmd
         [Option("filter", Required = false, HelpText = "If raw file path is a folder, a file filter string (supports '*' wildcard)")]
         public string FileFilter { get; set; }
 
-        [Option("method", Required = false, HelpText = "For mzML files, the method file path", HelpShowsDefault = false)]
+        [Option("method", Required = false, HelpText = "For mzML files, the method file path - TSV/CSV file, required column headers are 'Compound Name', 'Precursor (m/z)', 'Product (m/z)', 'Start Time (min)', 'End Time (min)'", HelpShowsDefault = false)]
         public string MethodFilePath { get; set; }
 
         [Option("t", Required = false, HelpText = "Peak area threshold for a compound to be considered \"passing\"", Min = 0)]
